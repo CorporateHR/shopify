@@ -1,0 +1,91 @@
+/* Data Transform Page Styling */
+.dataTransformContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.columnMappingSection {
+  background-color: var(--p-surface-neutral-subdued);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.errorZone {
+  grid-column: span 2;
+  margin-bottom: 1rem;
+}
+
+.mappingTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.mappingTableHeader {
+  background-color: var(--p-surface-neutral);
+  font-weight: bold;
+}
+
+.columnCell {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--p-border-neutral-subdued);
+}
+
+.matchedColumn {
+  background-color: var(--p-surface-success-subdued);
+}
+
+.unmatchedColumn {
+  background-color: var(--p-surface-critical-subdued);
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.previewModal {
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .dataTransformContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .errorZone {
+    grid-column: span 1;
+  }
+}
+
+/* Accessibility Enhancements */
+.focusable:focus {
+  outline: 2px solid var(--p-border-interactive);
+  outline-offset: 2px;
+}
+
+/* Drag and Drop Styling */
+.dragActive {
+  border: 2px dashed var(--p-border-interactive);
+  background-color: var(--p-surface-highlight-subdued);
+}
+
+/* Error and Validation Indicators */
+.errorIndicator {
+  color: var(--p-text-critical);
+  font-weight: bold;
+}
+
+.warningIndicator {
+  color: var(--p-text-warning);
+}
+
+.successIndicator {
+  color: var(--p-text-success);
+}

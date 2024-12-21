@@ -1,0 +1,80 @@
+/* Store Connection Page Styles */
+.storeConnectionContainer {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.connectionHeader {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.permissionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.permissionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.permissionItem input[type="checkbox"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--p-border-neutral);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.permissionItem input[type="checkbox"]:checked {
+  background-color: var(--p-interactive);
+  border-color: var(--p-interactive);
+}
+
+.permissionItem input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+}
+
+.storeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.storeItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--p-surface-neutral-subdued);
+  border-radius: 6px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .storeConnectionContainer {
+    padding: 0.5rem;
+  }
+}
+
+/* Accessibility Enhancements */
+.permissionItem label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.permissionItem input:focus {
+  box-shadow: 0 0 0 2px var(--p-border-interactive);
+}
