@@ -1,0 +1,10 @@
+{
+    "tailwindCSS.experimental.classRegex": [
+        ["clsx\\(([^)]*)\\)", "(?:'|\")([^\"']*)(?:'|\")"],
+        ["classnames\\(([^)]*)\\)", "(?:'|\")([^\"']*)(?:'|\")"]
+    ],
+    "tailwindCSS.validate": true,
+    "editor.quickSuggestions": {
+        "strings": true
+    }
+}
