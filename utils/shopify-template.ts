@@ -63,7 +63,14 @@ export type ShopifyProduct = z.infer<typeof ShopifyProductSchema>;
 
 // Get all headers
 export const getShopifyTemplateHeaders = (): string[] => {
-  return Object.keys(ShopifyProductSchema.shape);
+  const baseHeaders = [
+    ...Object.keys(ShopifyProductSchema.shape),
+    'Additional Field 1',
+    'Additional Field 2',
+    'Additional Field 3'
+  ];
+  
+  return baseHeaders;
 };
 
 // Comprehensive mapping function
@@ -76,21 +83,34 @@ export const mapToShopifyTemplate = (
   return uploadedData.map(row => {
     const mappedRow: ShopifyProduct = {};
     
-    shopifyHeaders.forEach(shopifyHeader => {
-      // Find the original header that maps to this Shopify header
-      const originalHeader = Object.keys(headerMappings).find(
-        key => headerMappings[key] === shopifyHeader
-      );
+    // Create a reverse mapping from original headers to Shopify headers
+    const reverseHeaderMappings: Record<string, string> = {};
+    Object.entries(headerMappings).forEach(([originalHeader, shopifyHeader]) => {
+      reverseHeaderMappings[originalHeader] = shopifyHeader;
+    });
+
+    // Iterate through uploaded data headers in a fixed order
+    Object.keys(row).forEach(originalHeader => {
+      // Find the Shopify header that maps to this original header
+      const shopifyHeader = reverseHeaderMappings[originalHeader];
       
-      // Prioritize mapping, then direct match, then 'N/A'
-      if (originalHeader && row[originalHeader]) {
-        // Use mapped value
+      // If a mapping exists, use it
+      if (shopifyHeader) {
         mappedRow[shopifyHeader as keyof ShopifyProduct] = row[originalHeader];
-      } else if (row[shopifyHeader]) {
-        // Direct match if exists
-        mappedRow[shopifyHeader as keyof ShopifyProduct] = row[shopifyHeader];
       } else {
-        // Default to 'N/A'
+        // If no mapping exists, check if the original header matches a Shopify header
+        if (shopifyHeaders.includes(originalHeader)) {
+          mappedRow[originalHeader as keyof ShopifyProduct] = row[originalHeader];
+        } else {
+          // Default to 'N/A' for unmapped headers
+          mappedRow[originalHeader as keyof ShopifyProduct] = 'N/A';
+        }
+      }
+    });
+    
+    // Fill in any remaining Shopify headers with 'N/A'
+    shopifyHeaders.forEach(shopifyHeader => {
+      if (!(shopifyHeader in mappedRow)) {
         mappedRow[shopifyHeader as keyof ShopifyProduct] = 'N/A';
       }
     });
