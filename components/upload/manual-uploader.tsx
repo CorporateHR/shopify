@@ -52,7 +52,6 @@ export function ManualUploader() {
       
       toast({
         title: 'Success',
-        description: 'Product added successfully',
       });
       
       form.reset();
@@ -60,7 +59,6 @@ export function ManualUploader() {
       console.error('Error adding product:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add product',
         variant: 'destructive',
       });
     } finally {

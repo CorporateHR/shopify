@@ -31,7 +31,7 @@ export class TokenManager {
       const iv = randomBytes(IV_LENGTH);
       
       // Convert key to Uint8Array
-      const key: CipherKey = new Uint8Array(ENCRYPTION_KEY);
+      const key: CipherKey = Uint8Array.from(ENCRYPTION_KEY);
       
       const cipher = createCipheriv(
         ENCRYPTION_ALGORITHM, 
@@ -57,7 +57,7 @@ export class TokenManager {
 
   static decrypt(credentials: EncryptedCredentials): string {
     try {
-      const key: CipherKey = new Uint8Array(ENCRYPTION_KEY);
+      const key: CipherKey = Uint8Array.from(ENCRYPTION_KEY);
       const iv = Buffer.from(credentials.iv, 'hex');
       
       const decipher = createDecipheriv(
