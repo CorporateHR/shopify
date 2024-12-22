@@ -44,7 +44,8 @@ export function ShopifyStoreConnectionForm() {
 
       if (isConnected) {
         // Encrypt and securely store credentials
-        const encryptedCredentials = await TokenManager.storeShopifyCredentials(
+        const tokenManager = new TokenManager(process.env.ENCRYPTION_SECRET || '');
+        const encryptedCredentials = tokenManager.storeShopifyCredentials(
           shopDomain, 
           accessToken
         );
