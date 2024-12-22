@@ -11,6 +11,7 @@ import {
   Palette, 
   Globe 
 } from 'lucide-react';
+import { ShopifyStoreConnectionForm } from "@/components/shopify/store-connection-form";
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState('profile');
@@ -218,6 +219,25 @@ export default function SettingsPage() {
                 <option>UTC+1 (Central European Time)</option>
               </select>
             </div>
+          </div>
+        </div>
+      )
+    },
+    { 
+      id: 'shopify', 
+      name: 'Shopify Integration', 
+      icon: CloudCog,
+      content: (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-semibold">Shopify Store Connection</h2>
+          <div className="grid md:grid-cols-1 gap-6">
+            <ShopifyStoreConnectionForm />
+          </div>
+          <div className="text-sm text-muted-foreground">
+            <p>
+              Connect your Shopify store to enable seamless product management and synchronization. 
+              You'll need your store's domain and a valid access token from your Shopify Partner account.
+            </p>
           </div>
         </div>
       )

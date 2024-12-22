@@ -52,34 +52,34 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<Upload className="h-8 w-8" />}
+              icon={Upload}
               title="Multiple Format Support"
               description="Import data from Excel, CSV, XML and more. We handle all the heavy lifting."
             />
             <FeatureCard
-              icon={<Zap className="h-8 w-8" />}
-              title="Intelligent Mapping"
-              description="Our smart system automatically maps your data to Shopify's required format."
+              icon={Download}
+              title="Shopify Ready"
+              description="Automatically map and transform your data to match Shopify's product template."
             />
             <FeatureCard
-              icon={<Shield className="h-8 w-8" />}
+              icon={Zap}
+              title="AI-Powered Mapping"
+              description="Our intelligent system learns from your data to suggest the most accurate field mappings."
+            />
+            <FeatureCard
+              icon={Shield}
+              title="Secure & Private"
+              description="Your data is encrypted and processed locally. We never store sensitive information."
+            />
+            <FeatureCard
+              icon={BarChart3}
+              title="Performance Insights"
+              description="Get detailed analytics and insights about your product data transformation."
+            />
+            <FeatureCard
+              icon={FileCheck}
               title="Data Validation"
-              description="Ensure your data meets Shopify's requirements before upload."
-            />
-            <FeatureCard
-              icon={<Download className="h-8 w-8" />}
-              title="Direct Integration"
-              description="Push products directly to your Shopify store with our API integration."
-            />
-            <FeatureCard
-              icon={<BarChart3 className="h-8 w-8" />}
-              title="Batch Processing"
-              description="Handle thousands of products at once with our powerful batch processing."
-            />
-            <FeatureCard
-              icon={<FileCheck className="h-8 w-8" />}
-              title="Template Library"
-              description="Access pre-built templates for common product data structures."
+              description="Automatically detect and flag potential errors or inconsistencies in your data."
             />
           </div>
         </div>
@@ -93,17 +93,17 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <StepCard
-              number="1"
+              number={1}
               title="Upload Your File"
               description="Upload your product data in any common format - Excel, CSV, or XML."
             />
             <StepCard
-              number="2"
+              number={2}
               title="Review Mapping"
               description="Our system automatically maps your data fields to Shopify's format."
             />
             <StepCard
-              number="3"
+              number={3}
               title="Export or Upload"
               description="Download the converted file or directly upload to your Shopify store."
             />
@@ -167,7 +167,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Shopify CSV. All rights reserved.
+            {new Date().getFullYear()} Shopify CSV. All rights reserved.
           </div>
         </div>
       </footer>
@@ -175,17 +175,35 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon, title, description }) {
+function FeatureCard({ 
+  icon: Icon, 
+  title, 
+  description 
+}: { 
+  icon: React.ComponentType<{ className?: string }>, 
+  title: string, 
+  description: string 
+}) {
   return (
     <Card className="p-6">
-      <div className="mb-4 text-primary">{icon}</div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <div className="mb-4 text-primary">
+        <Icon className="w-8 h-8" />
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
     </Card>
   );
 }
 
-function StepCard({ number, title, description }) {
+function StepCard({ 
+  number, 
+  title, 
+  description 
+}: { 
+  number: number, 
+  title: string, 
+  description: string 
+}) {
   return (
     <Card className="p-6 relative">
       <div className="text-6xl font-bold text-primary/10 absolute top-4 right-4">
