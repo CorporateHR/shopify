@@ -12,6 +12,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { CSVUploader } from "@/components/upload/csv-uploader";
+import { ManualUploader } from "@/components/upload/manual-uploader";
 
 export default function UploadPage() {
   const [uploadType, setUploadType] = useState<'csv' | 'manual'>('csv');
@@ -22,63 +23,75 @@ export default function UploadPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <Card>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Upload Products</h1>
+          <p className="text-gray-600">
+            Import your product data using CSV or enter manually
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <Card 
+            className={`cursor-pointer transition-all ${
+              uploadType === 'csv' ? 'ring-2 ring-primary' : ''
+            }`}
+            onClick={() => setUploadType('csv')}
+          >
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-2xl">Shopify CSV Uploader</CardTitle>
-                  <CardDescription>
-                    Upload and transform your product data for Shopify
-                  </CardDescription>
-                </div>
-                <Button 
-                  onClick={handleDownloadTemplate}
-                >
-                  <Download className="mr-2 h-4 w-4" /> 
-                  Download Template
-                </Button>
-              </div>
+              <CardTitle>CSV Upload</CardTitle>
+              <CardDescription>
+                Import multiple products at once using a CSV file
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex space-x-2">
-                  <Button 
-                    variant={uploadType === 'csv' ? 'default' : 'outline'}
-                    onClick={() => setUploadType('csv')}
-                  >
-                    CSV Upload
-                  </Button>
-                  <Button 
-                    variant={uploadType === 'manual' ? 'default' : 'outline'}
-                    onClick={() => setUploadType('manual')}
-                  >
-                    Manual Entry
-                  </Button>
-                </div>
-              </div>
+          </Card>
 
-              {uploadType === 'csv' && (
-                <CSVUploader />
-              )}
-
-              {uploadType === 'manual' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Manual Product Entry</CardTitle>
-                    <CardDescription>
-                      Manually add products to your Shopify store
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p>Manual product entry coming soon...</p>
-                  </CardContent>
-                </Card>
-              )}
-            </CardContent>
+          <Card 
+            className={`cursor-pointer transition-all ${
+              uploadType === 'manual' ? 'ring-2 ring-primary' : ''
+            }`}
+            onClick={() => setUploadType('manual')}
+          >
+            <CardHeader>
+              <CardTitle>Manual Entry</CardTitle>
+              <CardDescription>
+                Add products one by one with a form interface
+              </CardDescription>
+            </CardHeader>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {uploadType === 'csv' ? 'CSV Upload' : 'Manual Entry'}
+            </CardTitle>
+            <CardDescription>
+              {uploadType === 'csv' 
+                ? 'Upload your product data using a CSV file' 
+                : 'Enter your product details manually'
+              }
+            </CardDescription>
+            {uploadType === 'csv' && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleDownloadTemplate}
+                className="mt-2"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Template
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            {uploadType === 'csv' ? (
+              <CSVUploader />
+            ) : (
+              <ManualUploader />
+            )}
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );

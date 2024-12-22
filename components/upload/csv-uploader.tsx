@@ -1,91 +1,147 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Papa from 'papaparse';
+import { toast } from "@/components/ui/use-toast";
+import { AIFieldMapper, FieldMapping } from '@/utils/ai-field-mapper';
 import { Button } from '@/components/ui/button';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { 
-  Command, 
-  CommandEmpty, 
-  CommandGroup, 
-  CommandInput, 
-  CommandItem, 
-  CommandList 
-} from '@/components/ui/command';
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from '@/components/ui/popover';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/components/ui/use-toast';
-import { mapCSVToShopifyTemplate } from '@/utils/csv-mapper';
-import { DEFAULT_TEMPLATE } from '@/utils/csv-template';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Upload, X, Check, AlertTriangle, FileSpreadsheet } from 'lucide-react';
+import axios from 'axios';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ToastAction } from '@/components/ui/toast';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
-type UploadStage = 'initial' | 'uploading' | 'mapping' | 'completed' | 'error';
+interface UploadedData {
+  data: any[];
+  headers: string[];
+}
 
 export function CSVUploader() {
   const [file, setFile] = useState<File | null>(null);
-  const [stage, setStage] = useState<UploadStage>('initial');
-  const [progress, setProgress] = useState(0);
-  const [parsedCSV, setParsedCSV] = useState<any[]>([]);
-  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
-  const [mappedCSV, setMappedCSV] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<any[]>([]);
-  const [fieldMappings, setFieldMappings] = useState<{[key: string]: string}>({});
-  const [openDropdowns, setOpenDropdowns] = useState<{[key: string]: boolean}>({});
-  
-  const { toast } = useToast();
+  const [uploadedData, setUploadedData] = useState<UploadedData | null>(null);
+  const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [mapping, setMapping] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Shopify template headers
-  const shopifyHeaders = useMemo(() => 
-    DEFAULT_TEMPLATE.split('\n')[0].split(','), 
-    []
-  );
+  const uploadToServer = async (uploadedFile: File) => {
+    const formData = new FormData();
+    formData.append('file', uploadedFile);
+
+    try {
+      const response = await axios.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          const progress = progressEvent.total
+            ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            : 0;
+          setUploadProgress(progress);
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: 'Upload Failed',
+        variant: 'destructive',
+        action: (
+          <ToastAction altText="Upload failed">
+            Unable to upload CSV file
+          </ToastAction>
+        )
+      });
+      throw error;
+    }
+  };
+
+  const parseFile = async (file: File): Promise<UploadedData> => {
+    return new Promise((resolve, reject) => {
+      if (file.type === 'text/csv') {
+        Papa.parse(file, {
+          complete: (results) => {
+            if (results.data && Array.isArray(results.data)) {
+              const headers = results.data[0] as string[];
+              const data = results.data.slice(1) as any[];
+              resolve({ data, headers });
+            } else {
+              reject(new Error('Invalid CSV format'));
+            }
+          },
+          header: false,
+          error: (error) => {
+            reject(error);
+          }
+        });
+      } else {
+        reject(new Error('Unsupported file type'));
+      }
+    });
+  };
+
+  const mapFieldsWithAI = async () => {
+    if (!uploadedData) return;
+
+    setMapping(true);
+    try {
+      const aiMapper = new AIFieldMapper();
+      const mappings = await aiMapper.mapFields(uploadedData.headers);
+      setFieldMappings(mappings);
+
+      toast({
+        title: 'Mapping Complete',
+        action: (
+          <ToastAction altText="Mapping complete">
+            {`Successfully mapped ${mappings.length} fields`}
+          </ToastAction>
+        )
+      });
+    } catch (error) {
+      console.error('AI mapping error:', error);
+      toast({
+        title: 'Mapping Failed',
+        variant: 'destructive',
+        action: (
+          <ToastAction altText="Mapping failed">
+            Unable to map fields automatically
+          </ToastAction>
+        )
+      });
+    } finally {
+      setMapping(false);
+    }
+  };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const csvFile = acceptedFiles[0];
-    if (csvFile) {
-      setFile(csvFile);
-      
-      // Parse headers
-      Papa.parse(csvFile, {
-        complete: (results: Papa.ParseResult<any>) => {
-          if (results.data.length > 0) {
-            const headers = Object.keys(results.data[0] as object);
-            setCsvHeaders(headers);
-            setParsedCSV(results.data);
-            setStage('mapping');
-          }
-        },
-        header: true,
-        skipEmptyLines: true,
+    const uploadedFile = acceptedFiles[0];
+    if (uploadedFile) {
+      setFile(uploadedFile);
+      toast({
+        title: 'File Selected',
+        action: (
+          <ToastAction altText="File details">
+            {`${uploadedFile.name} (${(uploadedFile.size / 1024).toFixed(2)} KB)`}
+          </ToastAction>
+        )
       });
     }
   }, []);
@@ -95,255 +151,233 @@ export function CSVUploader() {
     accept: {
       'text/csv': ['.csv']
     },
+    maxFiles: 1,
     multiple: false
   });
 
-  const handleFieldMapping = (shopifyField: string, csvField: string) => {
-    setFieldMappings(prev => ({
-      ...prev,
-      [shopifyField]: csvField
-    }));
-    // Close the dropdown after selection
-    setOpenDropdowns(prev => ({
-      ...prev,
-      [shopifyField]: false
-    }));
-  };
+  const handleUpload = async () => {
+    if (!file) return;
 
-  const completeMapping = () => {
+    setUploading(true);
+    setUploadProgress(0);
+
     try {
-      // Validate that all required fields are mapped
-      const requiredFields = [
-        'Title', 
-        'Variant Price', 
-        'Variant SKU', 
-        'Published'
-      ];
+      await uploadToServer(file);
+      const parsedData = await parseFile(file);
+      setUploadedData(parsedData);
 
-      const missingMappings = requiredFields.filter(
-        field => !fieldMappings[field]
-      );
-
-      if (missingMappings.length > 0) {
-        toast({
-          children: (
-            <div>
-              <div className="font-semibold">Mapping Incomplete</div>
-              <div>Please map the following required fields: {missingMappings.join(', ')}</div>
-            </div>
-          ),
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      // Transform CSV based on mappings
-      const mappedData = parsedCSV.map(row => {
-        const mappedRow: {[key: string]: string} = {};
-        
-        Object.entries(fieldMappings).forEach(([shopifyField, csvField]) => {
-          mappedRow[shopifyField] = row[csvField] || '';
-        });
-
-        return mappedRow;
-      });
-
-      // Convert mapped data to CSV
-      const csvContent = [
-        shopifyHeaders.join(','),
-        ...mappedData.map(row => 
-          shopifyHeaders.map(header => row[header] || '').join(',')
-        )
-      ].join('\n');
-
-      setMappedCSV(csvContent);
-      setStage('completed');
-
-      toast({
-        children: (
-          <div>
-            <div className="font-semibold">Mapping Completed</div>
-            <div>Successfully mapped {mappedData.length} rows</div>
-          </div>
-        ),
-        variant: 'default'
-      });
-
+      // Automatically start AI mapping
+      await mapFieldsWithAI();
     } catch (error) {
-      console.error('Mapping error:', error);
-      
+      console.error('Upload error:', error);
       toast({
-        children: (
-          <div>
-            <div className="font-semibold">Mapping Error</div>
-            <div>An error occurred while mapping the CSV</div>
-          </div>
-        ),
-        variant: 'destructive'
+        title: 'Processing Failed',
+        variant: 'destructive',
+        action: (
+          <ToastAction altText="Processing failed">
+            Unable to process the file
+          </ToastAction>
+        )
       });
+    } finally {
+      setUploading(false);
     }
   };
 
-  const renderMappingInterface = () => (
-    <div className="grid grid-cols-2 gap-8 p-4">
-      <div className="space-y-4">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-4">Shopify Template Fields</h3>
-          <div className="space-y-2">
-            {shopifyHeaders.map((header, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input 
-                  value={header} 
-                  readOnly 
-                  className="flex-grow bg-white" 
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      <div className="space-y-4">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-4">Map Your CSV Fields</h3>
-          <div className="space-y-2">
-            {shopifyHeaders.map((header, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Label className="w-1/3 text-sm font-medium">{header}</Label>
-                <Popover 
-                  open={openDropdowns[header]} 
-                  onOpenChange={(open) => 
-                    setOpenDropdowns(prev => ({
-                      ...prev,
-                      [header]: open
-                    }))
-                  }
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={openDropdowns[header]}
-                      className="w-full justify-between"
-                    >
-                      {fieldMappings[header] 
-                        ? fieldMappings[header]
-                        : "Select CSV field"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput 
-                        placeholder="Search CSV fields..." 
-                        className="h-9"
-                      />
-                      <CommandList>
-                        <CommandEmpty>No field found.</CommandEmpty>
-                        <CommandGroup>
-                          <CommandItem 
-                            key="_none" 
-                            value="_none"
-                            onSelect={() => handleFieldMapping(header, '')}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                fieldMappings[header] === '' 
-                                  ? "opacity-100" 
-                                  : "opacity-0"
-                              )}
-                            />
-                            None
-                          </CommandItem>
-                          {csvHeaders.map((csvHeader) => (
-                            <CommandItem 
-                              key={csvHeader} 
-                              value={csvHeader}
-                              onSelect={() => handleFieldMapping(header, csvHeader)}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  fieldMappings[header] === csvHeader 
-                                    ? "opacity-100" 
-                                    : "opacity-0"
-                                )}
-                              />
-                              {csvHeader}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <Button 
-          onClick={completeMapping} 
-          className="w-full"
-          variant="default"
-        >
-          Complete Mapping
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (stage) {
-      case 'initial':
-        return (
-          <div 
-            {...getRootProps()} 
-            className={`border-2 border-dashed p-10 text-center cursor-pointer ${
-              isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-            }`}
-          >
-            <input {...getInputProps()} />
-            <p>Drag 'n' drop a CSV file here, or click to select</p>
-          </div>
-        );
-      case 'mapping':
-        return renderMappingInterface();
-      case 'completed':
-        return (
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Mapped CSV Preview</h3>
-            <pre className="bg-gray-100 p-4 rounded max-h-[300px] overflow-auto">
-              {mappedCSV?.slice(0, 1000)}
-              {(mappedCSV?.length || 0) > 1000 ? '...' : ''}
-            </pre>
-          </div>
-        );
-      default:
-        return null;
-    }
+  const removeFile = () => {
+    setFile(null);
+    setUploadProgress(0);
+    setUploadedData(null);
+    setFieldMappings([]);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Shopify Product CSV Uploader</CardTitle>
-        <CardDescription>
-          Upload and map your product CSV to Shopify format
-        </CardDescription>
-        <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.href = '/shopify-template.csv'}
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* File Upload Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <FileSpreadsheet className="h-6 w-6" />
+            <span>CSV File Upload</span>
+          </CardTitle>
+          <CardDescription>
+            Upload a CSV file to map fields to Shopify
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div
+            {...getRootProps()}
+            className={`
+              border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+              transition-colors duration-200 hover:bg-muted/10
+              ${isDragActive ? 'border-primary bg-primary/5' : 'border-muted'}
+              ${file ? 'bg-muted/5' : ''}
+            `}
           >
-            Download Template
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {renderContent()}
-      </CardContent>
-    </Card>
+            <input {...getInputProps()} />
+            
+            {file ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(file.size / 1024).toFixed(2)} KB
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile();
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                <div className="text-muted-foreground">
+                  {isDragActive ? (
+                    <p>Drop the file here</p>
+                  ) : (
+                    <>
+                      <p className="font-medium">Drag and drop or click to upload</p>
+                      <p className="text-xs">CSV files only</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {file && (
+            <div className="mt-4 space-y-3">
+              {uploading && (
+                <Progress value={uploadProgress} className="w-full" />
+              )}
+              
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={removeFile}
+                  disabled={uploading || mapping}
+                >
+                  Remove
+                </Button>
+                <Button
+                  onClick={handleUpload}
+                  disabled={uploading || mapping}
+                >
+                  {uploading ? 'Processing...' : 'Upload & Map'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Field Mapping Section */}
+      {uploadedData && fieldMappings.length > 0 && (
+        <Card className="bg-white border-0 shadow-md">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-green-50 p-2 rounded-full">
+                  <Check className="h-6 w-6 text-green-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Field Mapping Results</CardTitle>
+                  <CardDescription className="text-sm mt-1">
+                    AI-suggested mappings for your Shopify product fields
+                  </CardDescription>
+                </div>
+              </div>
+              <Badge variant="secondary" className="px-3 py-1">
+                {fieldMappings.length} Fields Mapped
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-hidden rounded-b-lg">
+              <Table>
+                <TableHeader className="bg-gray-50">
+                  <TableRow>
+                    <TableHead className="font-semibold">Shopify Field</TableHead>
+                    <TableHead className="font-semibold">CSV Field</TableHead>
+                    <TableHead className="font-semibold text-right">Confidence</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {fieldMappings.map((mapping, index) => {
+                    const isHighConfidence = mapping.confidence >= 80;
+                    const isMediumConfidence = mapping.confidence >= 60 && mapping.confidence < 80;
+
+                    return (
+                      <TableRow 
+                        key={index}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <TableCell className="font-medium">
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-2 h-2 rounded-full ${
+                              isHighConfidence 
+                                ? 'bg-green-500' 
+                                : isMediumConfidence 
+                                  ? 'bg-yellow-500' 
+                                  : 'bg-gray-300'
+                            }`} />
+                            <span>{mapping.suggestedField}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-gray-600">
+                          {mapping.originalField}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Badge 
+                            variant={
+                              isHighConfidence 
+                                ? 'success' 
+                                : isMediumConfidence 
+                                  ? 'warning' 
+                                  : 'secondary'
+                            }
+                            className={`
+                              px-2 py-0.5 
+                              ${isHighConfidence 
+                                ? 'bg-green-100 text-green-800' 
+                                : isMediumConfidence 
+                                  ? 'bg-yellow-100 text-yellow-800' 
+                                  : 'bg-gray-100 text-gray-800'}
+                            `}
+                          >
+                            {mapping.confidence}%
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="p-4 bg-gray-50 border-t">
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  {fieldMappings.filter(m => m.confidence >= 80).length} high confidence matches
+                </div>
+                <Button variant="outline" className="text-sm">
+                  Review Mappings
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
