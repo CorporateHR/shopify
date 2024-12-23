@@ -52,7 +52,7 @@ export class AIFieldMapper {
       const shopifyHeaders = getShopifyTemplateHeaders();
 
       const prompt = `
-You are an expert at mapping CSV headers to Shopify product fields.
+You are an expert at mapping CSV headers to Shopify product fields with maximum coverage.
 
 Input CSV Headers:
 ${csvHeaders.join('\n')}
@@ -60,15 +60,25 @@ ${csvHeaders.join('\n')}
 Available Shopify Fields:
 ${shopifyHeaders.join('\n')}
 
-Task:
-Analyze each input CSV header and map it to the most appropriate Shopify field.
+Comprehensive Mapping Guidelines:
+1. Attempt to map EVERY input CSV header to a Shopify field
+2. Use flexible, intelligent matching strategies:
+   - Exact match
+   - Case-insensitive match
+   - Partial word match
+   - Semantic similarity
+   - Common synonyms and variations
+3. Be creative and lenient in mapping
+4. Assign confidence scores considering mapping strategy
 
-Requirements:
-1. Map ONLY the input fields that have a clear corresponding Shopify field
-2. Consider common variations and synonyms (e.g., "name" = "title", "description" = "body (html)")
-3. Assign a confidence score (0-100) based on how certain the mapping is
+Mapping Strategies:
+- Exact match gets 100% confidence
+- Case-insensitive match gets 90% confidence
+- Partial word match gets 70-80% confidence
+- Semantic similarity gets 60-70% confidence
+- Generic fallback gets 50% confidence
 
-Return the results in this exact JSON format:
+Return ALL mappings in this JSON format:
 {
   "mappings": [
     {
@@ -79,11 +89,14 @@ Return the results in this exact JSON format:
   ]
 }
 
-Important:
-- Only include mappings with confidence > 50
-- Each Shopify field should only be mapped once (no duplicates)
-- Preserve exact field names (case-sensitive)
-- Include reasoning for low-confidence matches
+Specific Mapping Hints:
+- "Product Name" → "Title"
+- "Description" → "Body (HTML)"
+- "Price" → "Variant Price"
+- "SKU" → "Variant SKU"
+- "Weight" → "Variant Grams"
+- "Category" → "Product Category"
+- "Vendor" → "Vendor"
 `;
 
       const result = await model.generateContent(prompt);
@@ -101,9 +114,9 @@ Important:
           throw new Error("Invalid mapping format");
         }
 
-        // Filter out low-confidence mappings
+        // Ensure at least 50% confidence, but be more inclusive
         return data.mappings.filter(
-          (mapping: FieldMapping) => mapping.confidence > 50
+          (mapping: FieldMapping) => mapping.confidence >= 50
         );
       } catch (parseError) {
         console.error('JSON Parsing Error:', parseError);

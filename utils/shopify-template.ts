@@ -89,28 +89,41 @@ export const mapToShopifyTemplate = (
       reverseHeaderMappings[originalHeader] = shopifyHeader;
     });
 
-    // Iterate through uploaded data headers in a fixed order
+    // Track which Shopify headers have been mapped
+    const mappedShopifyHeaders = new Set<string>();
+
+    // First, try exact and mapped matches
     Object.keys(row).forEach(originalHeader => {
-      // Find the Shopify header that maps to this original header
       const shopifyHeader = reverseHeaderMappings[originalHeader];
       
-      // If a mapping exists, use it
       if (shopifyHeader) {
         mappedRow[shopifyHeader as keyof ShopifyProduct] = row[originalHeader];
-      } else {
-        // If no mapping exists, check if the original header matches a Shopify header
-        if (shopifyHeaders.includes(originalHeader)) {
-          mappedRow[originalHeader as keyof ShopifyProduct] = row[originalHeader];
-        } else {
-          // Default to 'N/A' for unmapped headers
-          mappedRow[originalHeader as keyof ShopifyProduct] = 'N/A';
+        mappedShopifyHeaders.add(shopifyHeader);
+      } else if (shopifyHeaders.includes(originalHeader)) {
+        mappedRow[originalHeader as keyof ShopifyProduct] = row[originalHeader];
+        mappedShopifyHeaders.add(originalHeader);
+      }
+    });
+
+    // Then, try case-insensitive and partial matches
+    Object.keys(row).forEach(originalHeader => {
+      if (!reverseHeaderMappings[originalHeader]) {
+        const matchedHeader = shopifyHeaders.find(shopifyHeader => 
+          shopifyHeader.toLowerCase() === originalHeader.toLowerCase() ||
+          shopifyHeader.toLowerCase().includes(originalHeader.toLowerCase()) ||
+          originalHeader.toLowerCase().includes(shopifyHeader.toLowerCase())
+        );
+
+        if (matchedHeader && !mappedShopifyHeaders.has(matchedHeader)) {
+          mappedRow[matchedHeader as keyof ShopifyProduct] = row[originalHeader];
+          mappedShopifyHeaders.add(matchedHeader);
         }
       }
     });
     
-    // Fill in any remaining Shopify headers with 'N/A'
+    // Fill in unmapped Shopify headers with 'N/A'
     shopifyHeaders.forEach(shopifyHeader => {
-      if (!(shopifyHeader in mappedRow)) {
+      if (!mappedShopifyHeaders.has(shopifyHeader)) {
         mappedRow[shopifyHeader as keyof ShopifyProduct] = 'N/A';
       }
     });
