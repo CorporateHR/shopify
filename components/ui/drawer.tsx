@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
+import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -28,7 +29,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn('fixed inset-0 z-50 bg-black/80', className)}
+    className={cn('fixed inset-0 z-50 bg-black/40', className)}
     {...props}
   />
 ));
@@ -36,20 +37,44 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    showCloseButton?: boolean;
+    onClose?: () => void;
+  }
+>(({ className, children, showCloseButton = true, onClose, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background',
+        'fixed inset-x-0 bottom-0 z-50 flex h-[95vh] flex-col',
+        'rounded-t-[20px] border bg-background',
+        'shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.3)]',
+        'transition-all duration-300 ease-out',
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
-      {children}
+      <div className="px-6 pt-4 pb-2 flex items-center justify-between">
+        <div className="flex-1">
+          {showCloseButton && (
+            <DrawerClose 
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </DrawerClose>
+          )}
+        </div>
+        <div className="flex-1 flex justify-center">
+          <div className="h-1.5 w-12 bg-gray-300 rounded-full" />
+        </div>
+        <div className="flex-1" />
+      </div>
+
+      <div className="flex-1 overflow-y-auto overscroll-contain px-6 pb-8">
+        {children}
+      </div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));

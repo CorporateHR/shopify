@@ -1,45 +1,46 @@
 "use client";
 
-import React, { useState } from 'react';
-import { 
-  ShoppingBag, 
-  Store, 
-  Link2, 
-  CheckCircle2, 
-  AlertTriangle,
-  PlusCircle,
-  MoreVertical,
-  Trash2,
-  Settings
-} from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger,
-  DialogClose
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import React, { useState, useContext } from 'react';
+import { useRouter } from 'next/navigation';
+import { DrawerContext } from '@/contexts/drawer-context';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Store } from '@/types/store';
+
+// Define types for form state and response
+interface StoreConnectionFormState {
+  storeUrl: string;
+  apiKey?: string;
+  apiSecret?: string;
+  accessToken?: string;
+}
+
+interface ValidationErrors {
+  storeUrl?: string;
+  apiKey?: string;
+  apiSecret?: string;
+  accessToken?: string;
+}
+
+interface StoreConnectionResponse {
+  success: boolean;
+  message: string;
+  store?: {
+    name: string;
+    primaryDomain: string;
+    timezone: string;
+    shopOwner: string;
+    connectedAt: string;
+  };
+  credentials?: {
+    storeUrl: string;
+    apiKeyProvided: boolean;
+    accessTokenProvided: boolean;
+  };
+  errors?: ValidationErrors;
+  error?: string;
+}
 
 interface Store {
   id: string;
@@ -49,206 +50,320 @@ interface Store {
   orders: number;
   lastSync: string;
   status: 'connected' | 'error';
+  additionalInfo?: any; 
 }
 
 export default function StoreConnectionPage() {
-  const [stores, setStores] = useState<Store[]>([
-    {
-      id: '1',
-      name: 'Fashion Haven',
-      url: 'https://fashion-haven.myshopify.com',
-      products: 250,
-      orders: 1500,
-      lastSync: '2 hours ago',
-      status: 'connected'
-    },
-    {
-      id: '2',
-      name: 'Tech Emporium',
-      url: 'https://tech-emporium.myshopify.com',
-      products: 120,
-      orders: 750,
-      lastSync: '45 minutes ago',
-      status: 'connected'
-    },
-    {
-      id: '3',
-      name: 'Home Essentials',
-      url: 'https://home-essentials.myshopify.com',
-      products: 80,
-      orders: 300,
-      lastSync: '1 day ago',
-      status: 'error'
+  const { openDrawer } = useContext(DrawerContext);
+  const router = useRouter();
+
+  // Form state
+  const [formData, setFormData] = useState<StoreConnectionFormState>({
+    storeUrl: '',
+    apiKey: '',
+    apiSecret: '',
+    accessToken: ''
+  });
+
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [connectionSuccess, setConnectionSuccess] = useState<StoreConnectionResponse | null>(null);
+
+  // Store state - load from localStorage on initial render
+  const [stores, setStores] = useState<Store[]>(() => {
+    if (typeof window !== 'undefined') {
+      const storedStores = localStorage.getItem('connectedStores');
+      return storedStores ? JSON.parse(storedStores) : [];
     }
-  ]);
+    return [];
+  });
 
-  const [newStoreUrl, setNewStoreUrl] = useState('');
-  const [isAddStoreDialogOpen, setIsAddStoreDialogOpen] = useState(false);
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
 
-  const handleAddStore = () => {
-    if (!newStoreUrl.trim()) return;
-
-    try {
-      const url = new URL(newStoreUrl);
-      const newStore: Store = {
-        id: `store-${stores.length + 1}`,
-        name: url.hostname.replace('www.', '').replace('.myshopify.com', '').split('-').map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' '),
-        url: newStoreUrl,
-        products: 0,
-        orders: 0,
-        lastSync: 'Just Now',
-        status: 'connected'
-      };
-
-      setStores([...stores, newStore]);
-      setNewStoreUrl('');
-      setIsAddStoreDialogOpen(false);
-    } catch (error) {
-      alert('Please enter a valid Shopify store URL');
+    // Clear specific validation error when user starts typing
+    if (validationErrors[name as keyof ValidationErrors]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name as keyof ValidationErrors];
+        return newErrors;
+      });
     }
   };
 
+  // Handle store selection to open drawer
+  const handleStoreSelect = (store: Store) => {
+    openDrawer({
+      content: 'store-dashboard',
+      title: `${store.name} Dashboard`,
+      props: {
+        store: store
+      }
+    });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setConnectionError(null);
+    setValidationErrors({});
+    setConnectionSuccess(null);
+
+    try {
+      const response = await fetch('/api/store-connection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data: StoreConnectionResponse = await response.json();
+
+      if (data.success) {
+        setConnectionSuccess(data);
+        
+        // Create new store object
+        const newStore: Store = {
+          id: Date.now().toString(),
+          name: data.store?.name ?? '',
+          url: formData.storeUrl,
+          products: 0,
+          orders: 0,
+          lastSync: new Date().toLocaleString(),
+          status: 'connected',
+          additionalInfo: {
+            storeInfo: data.store,
+            rawResponse: data
+          }
+        };
+
+        // Update stores state and localStorage
+        const updatedStores = [...stores, newStore];
+        setStores(updatedStores);
+        
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('connectedStores', JSON.stringify(updatedStores));
+        }
+
+        // Reset form after successful connection
+        setFormData({
+          storeUrl: '',
+          apiKey: '',
+          apiSecret: '',
+          accessToken: ''
+        });
+      } else {
+        // Handle validation errors or connection errors
+        if (data.errors) {
+          setValidationErrors(data.errors);
+        }
+        setConnectionError(data.message || 'Connection failed');
+      }
+    } catch (error) {
+      console.error('Store Connection Error:', error);
+      setConnectionError(
+        error instanceof Error 
+          ? error.message 
+          : 'An unexpected error occurred'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle remove store
   const handleRemoveStore = (storeId: string) => {
-    setStores(stores.filter(store => store.id !== storeId));
+    const updatedStores = stores.filter(store => store.id !== storeId);
+    setStores(updatedStores);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('connectedStores', JSON.stringify(updatedStores));
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-4 md:py-8">
-      <Card className="w-full max-w-4xl mx-auto">
-        <CardHeader className="relative p-4 md:p-6">
-          <div className="absolute top-4 right-4">
-            <Dialog 
-              open={isAddStoreDialogOpen} 
-              onOpenChange={setIsAddStoreDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full md:w-auto">
-                  <PlusCircle className="mr-2 h-4 w-4" /> Add Store
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="w-[95%] max-w-md rounded-lg">
-                <DialogHeader>
-                  <DialogTitle className="text-lg">Connect New Shopify Store</DialogTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Enter your Shopify store URL to integrate
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-4xl space-y-8">
+        {/* Store Connection Form */}
+        <div className="bg-white shadow-md rounded-lg p-8">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900 mb-6">
+            Connect Your Shopify Store
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Existing form inputs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="storeUrl" className="block text-sm font-medium text-gray-700">
+                  Store URL
+                </label>
+                <input
+                  id="storeUrl"
+                  name="storeUrl"
+                  type="text"
+                  required
+                  className={`mt-1 block w-full rounded-md border ${
+                    validationErrors.storeUrl 
+                      ? 'border-red-500 text-red-900' 
+                      : 'border-gray-300 text-gray-900'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="your-store.myshopify.com"
+                  value={formData.storeUrl}
+                  onChange={handleInputChange}
+                />
+                {validationErrors.storeUrl && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {validationErrors.storeUrl}
                   </p>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-1 items-center gap-2">
-                    <Label htmlFor="store-url" className="text-left">
-                      Store URL
-                    </Label>
-                    <Input 
-                      id="store-url" 
-                      placeholder="https://your-store.myshopify.com" 
-                      className="w-full"
-                      value={newStoreUrl}
-                      onChange={(e) => setNewStoreUrl(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <DialogClose asChild>
-                    <Button variant="outline">
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button onClick={handleAddStore}>
-                    Connect Store
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <Store className="w-6 h-6 md:w-10 md:h-10 text-primary" />
-            <div>
-              <CardTitle className="text-lg md:text-xl">Store Management</CardTitle>
-              <CardDescription className="text-xs md:text-sm">
-                Connect, manage, and sync your Shopify stores
-              </CardDescription>
+                )}
+              </div>
+              {/* Add other input fields similarly */}
+              <div>
+                <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700">
+                  API Key (Optional)
+                </label>
+                <input
+                  id="apiKey"
+                  name="apiKey"
+                  type="text"
+                  className={`mt-1 block w-full rounded-md border ${
+                    validationErrors.apiKey 
+                      ? 'border-red-500 text-red-900' 
+                      : 'border-gray-300 text-gray-900'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="API Key (Optional)"
+                  value={formData.apiKey}
+                  onChange={handleInputChange}
+                />
+                {validationErrors.apiKey && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {validationErrors.apiKey}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="apiSecret" className="block text-sm font-medium text-gray-700">
+                  API Secret (Optional)
+                </label>
+                <input
+                  id="apiSecret"
+                  name="apiSecret"
+                  type="text"
+                  className={`mt-1 block w-full rounded-md border ${
+                    validationErrors.apiSecret 
+                      ? 'border-red-500 text-red-900' 
+                      : 'border-gray-300 text-gray-900'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="API Secret (Optional)"
+                  value={formData.apiSecret}
+                  onChange={handleInputChange}
+                />
+                {validationErrors.apiSecret && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {validationErrors.apiSecret}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="accessToken" className="block text-sm font-medium text-gray-700">
+                  Access Token (Optional)
+                </label>
+                <input
+                  id="accessToken"
+                  name="accessToken"
+                  type="text"
+                  className={`mt-1 block w-full rounded-md border ${
+                    validationErrors.accessToken 
+                      ? 'border-red-500 text-red-900' 
+                      : 'border-gray-300 text-gray-900'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                  placeholder="Access Token (Optional)"
+                  value={formData.accessToken}
+                  onChange={handleInputChange}
+                />
+                {validationErrors.accessToken && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {validationErrors.accessToken}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        
-        <Separator />
-        
-        <CardContent className="p-4 md:p-6">
-          <ScrollArea className="w-full">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+
+            <div className="flex justify-center">
+              <Button 
+                type="submit" 
+                className="w-full md:w-auto"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Connecting...' : 'Connect Store'}
+              </Button>
+            </div>
+          </form>
+        </div>
+
+        {/* Connected Stores Section */}
+        {stores.length > 0 && (
+          <div className="bg-white shadow-md rounded-lg p-8 mt-8">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Connected Stores
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {stores.map((store) => (
                 <Card 
                   key={store.id} 
-                  className={`
-                    border-2 w-full
-                    ${store.status === 'connected' 
-                      ? 'border-green-500/20 hover:border-green-500/40' 
-                      : 'border-red-500/20 hover:border-red-500/40'}
-                  `}
+                  className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => handleStoreSelect(store)}
                 >
-                  <CardHeader className="pb-2 p-3 md:p-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
-                        <CardTitle className="text-sm md:text-base">{store.name}</CardTitle>
-                      </div>
-                      <Badge 
-                        variant={store.status === 'connected' ? 'default' : 'destructive'}
-                        className="text-xs"
-                      >
-                        {store.status === 'connected' ? 'Connected' : 'Error'}
-                      </Badge>
-                    </div>
-                    <CardDescription className="mt-1 text-xs truncate">
-                      {store.url}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-3 md:p-4">
-                    <div className="grid grid-cols-2 gap-2 text-xs md:text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Products</p>
-                        <p className="font-semibold">{store.products}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Orders</p>
-                        <p className="font-semibold">{store.orders}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between items-center p-3 md:p-4 pt-2">
-                    <p className="text-[10px] md:text-xs text-muted-foreground truncate">
-                      Last Sync: {store.lastSync}
-                    </p>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <span className="sr-only">Store Actions</span>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="text-blue-600">
-                          <Settings className="mr-2 h-4 w-4" />
-                          Store Settings
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="text-red-600"
-                          onClick={() => handleRemoveStore(store.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Remove Store
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </CardFooter>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-lg font-medium">{store.name}</h4>
+                    <Badge 
+                      variant={store.status === 'connected' ? 'default' : 'destructive'}
+                    >
+                      {store.status}
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <p>URL: {store.url}</p>
+                    <p>Products: {store.products}</p>
+                    <p>Last Sync: {store.lastSync}</p>
+                  </div>
+                  <div className="flex justify-between mt-4">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStoreSelect(store);
+                      }}
+                    >
+                      View Dashboard
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveStore(store.id);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 </Card>
               ))}
             </div>
-          </ScrollArea>
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

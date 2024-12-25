@@ -1,10 +1,14 @@
 {
-    "tailwindCSS.experimental.classRegex": [
-        ["clsx\\(([^)]*)\\)", "(?:'|\")([^\"']*)(?:'|\")"],
-        ["classnames\\(([^)]*)\\)", "(?:'|\")([^\"']*)(?:'|\")"]
-    ],
+    "css.validate": false,
     "tailwindCSS.validate": true,
     "editor.quickSuggestions": {
-        "strings": true
-    }
+        "comments": "off",
+        "strings": "on",
+        "other": "on"
+    },
+    "tailwindCSS.experimental.classRegex": [
+        ["clsx\\(([^)]*)\\)", "(?:'|\")([^\"']*)(?:'|\")"],
+        ["classnames\\(([^)]*)\\)", "(?:'|\")([^\"']*)(?:'|\")"],
+        ["@apply\\s+([^;]*);", "(?:'|\")([^'\"]*)(?:'|\")"]
+    ]
 }

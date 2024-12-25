@@ -1,0 +1,1 @@
+/Users/dsyadav/Desktop/Shopify/src/types/store.ts
