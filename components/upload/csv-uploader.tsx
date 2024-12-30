@@ -194,13 +194,15 @@ export function CSVUploader() {
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* File Upload Section */}
-      <Card>
+      <Card 
+        className="bg-[#1A1A1A] border border-[#2A2A2A]"
+      >
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileSpreadsheet className="h-6 w-6" />
+          <CardTitle className="flex items-center space-x-2 text-[#EAEAEA]">
+            <FileSpreadsheet className="h-6 w-6 text-[#00A6B2]" />
             <span>CSV File Upload</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-[#C0C0C0]">
             Upload a CSV file to map fields to Shopify
           </CardDescription>
         </CardHeader>
@@ -209,9 +211,9 @@ export function CSVUploader() {
             {...getRootProps()}
             className={`
               border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-              transition-colors duration-200 hover:bg-muted/10
-              ${isDragActive ? 'border-primary bg-primary/5' : 'border-muted'}
-              ${file ? 'bg-muted/5' : ''}
+              transition-colors duration-200 hover:bg-[#2A2A2A]/20
+              ${isDragActive ? 'border-[#00A6B2] bg-[#00A6B2]/10' : 'border-[#2A2A2A]'}
+              ${file ? 'bg-[#2A2A2A]/5' : ''}
             `}
           >
             <input {...getInputProps()} />
@@ -219,10 +221,10 @@ export function CSVUploader() {
             {file ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <Upload className="h-5 w-5 text-muted-foreground" />
+                  <Upload className="h-5 w-5 text-[#C0C0C0]" />
                   <div>
-                    <p className="text-sm font-medium">{file.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm font-medium text-[#EAEAEA]">{file.name}</p>
+                    <p className="text-xs text-[#C0C0C0]">
                       {(file.size / 1024).toFixed(2)} KB
                     </p>
                   </div>
@@ -235,13 +237,13 @@ export function CSVUploader() {
                     removeFile();
                   }}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4 text-[#C0C0C0] hover:text-[#EAEAEA]" />
                 </Button>
               </div>
             ) : (
               <div className="space-y-2">
-                <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-                <div className="text-muted-foreground">
+                <Upload className="h-8 w-8 mx-auto text-[#C0C0C0]" />
+                <div className="text-[#C0C0C0]">
                   {isDragActive ? (
                     <p>Drop the file here</p>
                   ) : (
@@ -258,18 +260,22 @@ export function CSVUploader() {
           {file && (
             <div className="mt-4 space-y-3">
               {uploading && (
-                <Progress value={uploadProgress} className="w-full" />
+                <div className={`h-2 rounded-full ${uploadProgress === 100 ? 'bg-[#00A6B2]' : 'bg-[#2A2A2A]'}`} 
+                  style={{ width: `${uploadProgress}%` }}
+                />
               )}
               
               <div className="flex justify-end space-x-2">
                 <Button
                   variant="outline"
+                  className="border-[#00A6B2] text-[#00A6B2] hover:bg-[#00A6B2]/20"
                   onClick={removeFile}
                   disabled={uploading || mapping}
                 >
                   Remove
                 </Button>
                 <Button
+                  className="bg-[#00A6B2] hover:bg-[#008A94]"
                   onClick={handleUpload}
                   disabled={uploading || mapping}
                 >
@@ -283,21 +289,21 @@ export function CSVUploader() {
 
       {/* Field Mapping Section */}
       {uploadedData && fieldMappings.length > 0 && (
-        <Card className="bg-white border-0 shadow-md">
-          <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b">
+        <Card className="bg-[#1A1A1A] border border-[#2A2A2A]">
+          <CardHeader className="bg-[#2A2A2A] border-b border-[#2A2A2A]">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="bg-green-50 p-2 rounded-full">
-                  <Check className="h-6 w-6 text-green-500" />
+                <div className="bg-[#00A6B2]/20 p-2 rounded-full">
+                  <Check className="h-6 w-6 text-[#00A6B2]" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl">Field Mapping Results</CardTitle>
-                  <CardDescription className="text-sm mt-1">
+                  <CardTitle className="text-xl text-[#EAEAEA]">Field Mapping Results</CardTitle>
+                  <CardDescription className="text-sm mt-1 text-[#C0C0C0]">
                     AI-suggested mappings for your Shopify product fields
                   </CardDescription>
                 </div>
               </div>
-              <Badge variant="secondary" className="px-3 py-1">
+              <Badge variant="secondary" className="px-3 py-1 bg-[#2A2A2A] text-[#C0C0C0]">
                 {fieldMappings.length} Fields Mapped
               </Badge>
             </div>
@@ -305,11 +311,11 @@ export function CSVUploader() {
           <CardContent className="p-0">
             <div className="overflow-hidden rounded-b-lg">
               <Table>
-                <TableHeader className="bg-gray-50">
+                <TableHeader className="bg-[#2A2A2A]">
                   <TableRow>
-                    <TableHead className="font-semibold">Shopify Field</TableHead>
-                    <TableHead className="font-semibold">CSV Field</TableHead>
-                    <TableHead className="font-semibold text-right">Confidence</TableHead>
+                    <TableHead className="font-semibold text-[#EAEAEA]">Shopify Field</TableHead>
+                    <TableHead className="font-semibold text-[#EAEAEA]">CSV Field</TableHead>
+                    <TableHead className="font-semibold text-right text-[#EAEAEA]">Confidence</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -320,21 +326,21 @@ export function CSVUploader() {
                     return (
                       <TableRow 
                         key={index}
-                        className="hover:bg-gray-50 transition-colors"
+                        className="hover:bg-[#2A2A2A] transition-colors"
                       >
                         <TableCell className="font-medium">
                           <div className="flex items-center space-x-2">
                             <div className={`w-2 h-2 rounded-full ${
                               isHighConfidence 
-                                ? 'bg-green-500' 
+                                ? 'bg-[#00A6B2]' 
                                 : isMediumConfidence 
                                   ? 'bg-yellow-500' 
                                   : 'bg-gray-300'
                             }`} />
-                            <span>{mapping.suggestedField}</span>
+                            <span className="text-[#EAEAEA]">{mapping.suggestedField}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-gray-600">
+                        <TableCell className="text-[#C0C0C0]">
                           {mapping.originalField}
                         </TableCell>
                         <TableCell className="text-right">
@@ -349,10 +355,10 @@ export function CSVUploader() {
                             className={`
                               px-2 py-0.5 
                               ${isHighConfidence 
-                                ? 'bg-green-100 text-green-800' 
+                                ? 'bg-[#00A6B2]/20 text-[#00A6B2]' 
                                 : isMediumConfidence 
-                                  ? 'bg-yellow-100 text-yellow-800' 
-                                  : 'bg-gray-100 text-gray-800'}
+                                  ? 'bg-yellow-500/20 text-yellow-500' 
+                                  : 'bg-gray-500/20 text-gray-500'}
                             `}
                           >
                             {mapping.confidence}%
@@ -365,12 +371,15 @@ export function CSVUploader() {
               </Table>
             </div>
             
-            <div className="p-4 bg-gray-50 border-t">
+            <div className="p-4 bg-[#2A2A2A] border-t border-[#2A2A2A]">
               <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-[#C0C0C0]">
                   {fieldMappings.filter(m => m.confidence >= 80).length} high confidence matches
                 </div>
-                <Button variant="outline" className="text-sm">
+                <Button 
+                  variant="outline" 
+                  className="text-sm border-[#00A6B2] text-[#00A6B2] hover:bg-[#00A6B2]/20"
+                >
                   Review Mappings
                 </Button>
               </div>

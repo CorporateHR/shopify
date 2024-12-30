@@ -51,83 +51,99 @@ export function RegisterForm({ onModeChange }: RegisterFormProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-[#1A1A1A] p-8 rounded-lg border border-[#2A2A2A]">
       <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-2xl font-semibold tracking-tight text-[#EAEAEA]">Create an account</h1>
+        <p className="text-sm text-[#C0C0C0]">
           Enter your details below to create your account
         </p>
       </div>
 
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="bg-[#121212] border-destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name" className="text-[#C0C0C0]">Name</Label>
           <Input
             id="name"
             {...form.register("name")}
-            className={cn(form.formState.errors.name && "border-destructive")}
+            className={cn(
+              "bg-[#121212] border-[#2A2A2A] text-[#EAEAEA] focus:ring-[#00A6B2] focus:border-[#00A6B2]",
+              form.formState.errors.name && "border-destructive"
+            )}
           />
           {form.formState.errors.name && (
-            <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
+            <p className="text-sm text-destructive text-[#C0C0C0]">{form.formState.errors.name.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="text-[#C0C0C0]">Email</Label>
           <Input
             id="email"
             type="email"
             {...form.register("email")}
-            className={cn(form.formState.errors.email && "border-destructive")}
+            className={cn(
+              "bg-[#121212] border-[#2A2A2A] text-[#EAEAEA] focus:ring-[#00A6B2] focus:border-[#00A6B2]",
+              form.formState.errors.email && "border-destructive"
+            )}
           />
           {form.formState.errors.email && (
-            <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+            <p className="text-sm text-destructive text-[#C0C0C0]">{form.formState.errors.email.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password" className="text-[#C0C0C0]">Password</Label>
           <Input
             id="password"
             type="password"
             {...form.register("password")}
-            className={cn(form.formState.errors.password && "border-destructive")}
+            className={cn(
+              "bg-[#121212] border-[#2A2A2A] text-[#EAEAEA] focus:ring-[#00A6B2] focus:border-[#00A6B2]",
+              form.formState.errors.password && "border-destructive"
+            )}
           />
           {form.formState.errors.password && (
-            <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+            <p className="text-sm text-destructive text-[#C0C0C0]">{form.formState.errors.password.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Label htmlFor="confirmPassword" className="text-[#C0C0C0]">Confirm Password</Label>
           <Input
             id="confirmPassword"
             type="password"
             {...form.register("confirmPassword")}
-            className={cn(form.formState.errors.confirmPassword && "border-destructive")}
+            className={cn(
+              "bg-[#121212] border-[#2A2A2A] text-[#EAEAEA] focus:ring-[#00A6B2] focus:border-[#00A6B2]",
+              form.formState.errors.confirmPassword && "border-destructive"
+            )}
           />
           {form.formState.errors.confirmPassword && (
-            <p className="text-sm text-destructive">{form.formState.errors.confirmPassword.message}</p>
+            <p className="text-sm text-destructive text-[#C0C0C0]">{form.formState.errors.confirmPassword.message}</p>
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+        <Button 
+          type="submit" 
+          className="w-full bg-[#00A6B2] text-white hover:bg-[#008A94]" 
+          disabled={isLoading}
+        >
+          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin text-white" />}
           Sign Up
         </Button>
       </form>
 
-      <div className="text-center text-sm">
+      <div className="text-center text-sm text-[#C0C0C0]">
         Already have an account?{" "}
         <Button
           variant="link"
-          className="px-0"
+          className="px-0 text-[#00A6B2] hover:text-[#008A94]"
           onClick={() => onModeChange("login")}
         >
           Sign in

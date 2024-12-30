@@ -84,7 +84,7 @@ export default function StorefrontPage() {
       </div>
 
       {/* Loading and Error States */}
-      {loading && <p className="text-blue-500">Loading...</p>}
+      {loading && <p className="text-[#00A6B2]">Loading...</p>}
       {error && <p className="text-red-500">Error: {error.message}</p>}
 
       {/* Products Section */}
@@ -94,7 +94,7 @@ export default function StorefrontPage() {
           {products.map((product) => (
             <div 
               key={product.id} 
-              className="border rounded p-4 hover:shadow-lg transition-shadow"
+              className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-4 mb-4 shadow-md"
             >
               {/* Product Image */}
               {product.images.edges.length > 0 && (
@@ -106,19 +106,24 @@ export default function StorefrontPage() {
               )}
 
               {/* Product Details */}
-              <h3 className="font-bold text-lg">{product.title}</h3>
-              <p className="text-gray-600 text-sm mb-2 truncate">
-                {product.description}
-              </p>
-              <p className="font-semibold text-blue-600">
-                {product.priceRange.minVariantPrice.amount.toLocaleString(
-                  'en-US', 
-                  { 
-                    style: 'currency', 
-                    currency: product.priceRange.minVariantPrice.currencyCode 
-                  }
-                )}
-              </p>
+              <div className="flex items-center mb-4">
+                <img 
+                  src={product.images.edges[0]?.node.url} 
+                  alt={product.title} 
+                  className="w-24 h-24 object-cover rounded-md mr-4" 
+                />
+                <div>
+                  <h2 className="text-xl font-bold text-[#EAEAEA] mb-2">{product.title}</h2>
+                  <p className="text-[#C0C0C0] text-sm mb-2 truncate">{product.description}</p>
+                  <p className="font-semibold text-[#00A6B2]">{product.priceRange.minVariantPrice.amount.toLocaleString(
+                    'en-US', 
+                    { 
+                      style: 'currency', 
+                      currency: product.priceRange.minVariantPrice.currencyCode 
+                    }
+                  )}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -130,35 +135,31 @@ export default function StorefrontPage() {
         {collections.map((collection) => (
           <div 
             key={collection.id} 
-            className="mb-6 p-4 border rounded"
+            className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-4 mb-4"
           >
-            <h3 className="text-xl font-bold mb-2">{collection.title}</h3>
-            <p className="text-gray-600 mb-4">{collection.description}</p>
+            <h3 className="text-xl font-bold text-[#EAEAEA] mb-4">{collection.title}</h3>
+            <p className="text-[#C0C0C0] mb-4">{collection.description}</p>
             
             {/* Collection Products */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {collection.products.edges.map(({ node: product }) => (
                 <div 
                   key={product.id} 
-                  className="border rounded p-2 hover:shadow-md transition-shadow"
+                  className="bg-[#2A2A2A] rounded-lg p-3 text-center"
                 >
-                  {product.images.edges.length > 0 && (
-                    <img
-                      src={product.images.edges[0].node.url}
-                      alt={product.images.edges[0].node.altText || product.title}
-                      className="w-full h-32 object-cover mb-2"
-                    />
-                  )}
-                  <h4 className="font-semibold text-sm truncate">{product.title}</h4>
-                  <p className="text-blue-600 text-xs">
-                    {product.priceRange.minVariantPrice.amount.toLocaleString(
-                      'en-US', 
-                      { 
-                        style: 'currency', 
-                        currency: product.priceRange.minVariantPrice.currencyCode 
-                      }
-                    )}
-                  </p>
+                  <img 
+                    src={product.images.edges[0]?.node.url} 
+                    alt={product.title} 
+                    className="w-full h-40 object-cover rounded-md mb-2" 
+                  />
+                  <p className="font-semibold text-[#EAEAEA]">{product.title}</p>
+                  <p className="text-[#00A6B2] text-xs">{product.priceRange.minVariantPrice.amount.toLocaleString(
+                    'en-US', 
+                    { 
+                      style: 'currency', 
+                      currency: product.priceRange.minVariantPrice.currencyCode 
+                    }
+                  )}</p>
                 </div>
               ))}
             </div>
@@ -174,7 +175,7 @@ export default function StorefrontPage() {
             {recommendations.map((product) => (
               <div 
                 key={product.id} 
-                className="border rounded p-4 hover:shadow-lg transition-shadow"
+                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-4 mb-4 shadow-md"
               >
                 {product.images.edges.length > 0 && (
                   <img
@@ -183,16 +184,14 @@ export default function StorefrontPage() {
                     className="w-full h-48 object-cover mb-4"
                   />
                 )}
-                <h3 className="font-bold text-lg">{product.title}</h3>
-                <p className="font-semibold text-blue-600">
-                  {product.priceRange.minVariantPrice.amount.toLocaleString(
-                    'en-US', 
-                    { 
-                      style: 'currency', 
-                      currency: product.priceRange.minVariantPrice.currencyCode 
-                    }
-                  )}
-                </p>
+                <h2 className="text-xl font-bold text-[#EAEAEA] mb-2">{product.title}</h2>
+                <p className="font-semibold text-[#00A6B2]">{product.priceRange.minVariantPrice.amount.toLocaleString(
+                  'en-US', 
+                  { 
+                    style: 'currency', 
+                    currency: product.priceRange.minVariantPrice.currencyCode 
+                  }
+                )}</p>
               </div>
             ))}
           </div>

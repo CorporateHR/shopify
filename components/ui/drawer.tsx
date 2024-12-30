@@ -5,6 +5,34 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/components/ui/use-toast';
+
+const productSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  price: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Invalid price format'),
+  sku: z.string().min(1, 'SKU is required'),
+  vendor: z.string().optional(),
+  quantity: z.string().regex(/^\d+$/, 'Quantity must be a whole number'),
+});
+
+type ProductFormValues = z.infer<typeof productSchema>;
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -29,7 +57,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn('fixed inset-0 z-50 bg-black/40', className)}
+    className={cn('fixed inset-0 z-50 bg-[#121212]/50', className)}
     {...props}
   />
 ));
@@ -40,44 +68,184 @@ const DrawerContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
     showCloseButton?: boolean;
     onClose?: () => void;
+    mode?: 'default' | 'create-product';
   }
->(({ className, children, showCloseButton = true, onClose, ...props }, ref) => (
-  <DrawerPortal>
-    <DrawerOverlay />
-    <DrawerPrimitive.Content
-      ref={ref}
-      className={cn(
-        'fixed inset-x-0 bottom-0 z-50 flex h-[95vh] flex-col',
-        'rounded-t-[20px] border bg-background',
-        'shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.3)]',
-        'transition-all duration-300 ease-out',
-        className
-      )}
-      {...props}
-    >
-      <div className="px-6 pt-4 pb-2 flex items-center justify-between">
-        <div className="flex-1">
-          {showCloseButton && (
-            <DrawerClose 
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </DrawerClose>
-          )}
-        </div>
-        <div className="flex-1 flex justify-center">
-          <div className="h-1.5 w-12 bg-gray-300 rounded-full" />
-        </div>
-        <div className="flex-1" />
-      </div>
+>(({ className, children, showCloseButton = true, onClose, mode = 'default', ...props }, ref) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-      <div className="flex-1 overflow-y-auto overscroll-contain px-6 pb-8">
-        {children}
-      </div>
-    </DrawerPrimitive.Content>
-  </DrawerPortal>
-));
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      price: '',
+      sku: '',
+      vendor: '',
+      quantity: '',
+    },
+  });
+
+  const onSubmit = async (data: ProductFormValues) => {
+    setIsSubmitting(true);
+    try {
+      // TODO: Implement actual product creation logic
+      console.log('Product data:', data);
+      
+      toast({
+        title: 'Product Added Successfully',
+        description: `Product "${data.title}" has been created.`,
+      });
+      
+      form.reset();
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add product.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <DrawerPortal>
+      <DrawerOverlay />
+      <DrawerPrimitive.Content
+        ref={ref}
+        className={cn(
+          'fixed inset-x-0 bottom-0 z-50 flex h-[95vh] flex-col',
+          'rounded-t-[20px] border border-[#2A2A2A]',
+          'bg-[#1A1A1A]',
+          'shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.3)]',
+          'transition-all duration-300 ease-out',
+          className
+        )}
+        {...props}
+      >
+        <div className="mx-auto w-12 h-1.5 my-4 rounded-full bg-[#2A2A2A]" />
+        {mode === 'create-product' ? (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter product title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Enter product description"
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="text"
+                          placeholder="0.00"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Enter price in your store's currency</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number"
+                          placeholder="0"
+                          min="0"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SKU</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter SKU" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="vendor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vendor (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter vendor name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Adding Product...' : 'Add Product'}
+              </Button>
+            </form>
+          </Form>
+        ) : (
+          children
+        )}
+      </DrawerPrimitive.Content>
+    </DrawerPortal>
+  );
+});
 DrawerContent.displayName = 'DrawerContent';
 
 const DrawerHeader = ({
@@ -109,7 +277,7 @@ const DrawerTitle = React.forwardRef<
   <DrawerPrimitive.Title
     ref={ref}
     className={cn(
-      'text-lg font-semibold leading-none tracking-tight',
+      'text-lg font-semibold leading-none tracking-tight text-[#EAEAEA]',
       className
     )}
     {...props}
@@ -140,4 +308,5 @@ export {
   DrawerFooter,
   DrawerTitle,
   DrawerDescription,
+  DrawerPrimitive,
 };

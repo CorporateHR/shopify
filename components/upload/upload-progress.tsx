@@ -19,28 +19,28 @@ export function UploadProgress() {
   ];
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">
+    <div className="bg-[#1A1A1A] shadow-md rounded-lg p-6 border border-[#2A2A2A]">
+      <h2 className="text-xl font-semibold mb-4 text-[#EAEAEA]">
         Upload Progress
       </h2>
 
       {uploadProgress.map((file, index) => (
         <div 
           key={index} 
-          className="mb-4 last:mb-0"
+          className="mb-4 last:mb-0 border-b border-[#2A2A2A] pb-4"
         >
           <div className="flex justify-between items-center mb-2">
-            <h3 className="font-medium">{file.name}</h3>
+            <h3 className="font-medium text-[#EAEAEA]">{file.name}</h3>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">{file.speed}</span>
+              <span className="text-sm text-[#C0C0C0]">{file.speed}</span>
               <button 
-                className="text-gray-500 hover:text-gray-700"
+                className="text-[#C0C0C0] hover:text-[#EAEAEA]"
                 title="Pause upload"
               >
                 <Pause className="w-4 h-4" />
               </button>
               <button 
-                className="text-red-500 hover:text-red-700"
+                className="text-[#C0C0C0] hover:text-[#EAEAEA]"
                 title="Cancel upload"
               >
                 <X className="w-4 h-4" />
@@ -48,20 +48,20 @@ export function UploadProgress() {
             </div>
           </div>
           
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div className="w-full bg-[#2A2A2A] rounded-full h-2.5 mt-2">
             <div 
-              className="bg-blue-600 h-2.5 rounded-full" 
+              className="h-2.5 bg-[#00A6B2] rounded-full" 
               style={{ width: `${file.progress}%` }}
             ></div>
           </div>
-          <p className="text-sm text-gray-500 mt-1 text-right">
+          <p className="text-sm text-[#C0C0C0] mt-1 text-right">
             {file.progress}% Uploaded
           </p>
         </div>
       ))}
 
       {uploadProgress.length === 0 && (
-        <div className="text-center text-gray-500 py-6">
+        <div className="text-center text-[#C0C0C0] py-6">
           No active uploads
         </div>
       )}

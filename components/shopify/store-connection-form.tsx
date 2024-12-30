@@ -8,12 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createShopifyConnection } from '@/utils/shopify-connection';
 import { useToast } from '@/components/ui/use-toast';
 import { TokenManager } from '@/utils/server/token-manager';
+import { useRouter } from 'next/navigation';
 
 export function ShopifyStoreConnectionForm() {
   const [shopDomain, setShopDomain] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleConnection = async () => {
     // Validate inputs
@@ -45,36 +47,28 @@ export function ShopifyStoreConnectionForm() {
       if (isConnected) {
         // Encrypt and securely store credentials
         const tokenManager = new TokenManager(process.env.ENCRYPTION_SECRET || '');
-        const encryptedCredentials = tokenManager.storeShopifyCredentials(
-          shopDomain, 
-          accessToken
-        );
-
-        // Store encrypted credentials (could be in a secure database)
-        localStorage.setItem(
-          'shopify_encrypted_credentials', 
-          JSON.stringify(encryptedCredentials)
-        );
+        tokenManager.storeShopifyCredentials(shopDomain, accessToken);
 
         toast({
-          title: 'Connection Successful: Connected to Shopify store securely',
+          title: 'Store Connected Successfully',
+          description: `Connected to ${shopDomain}`,
           variant: 'default'
         });
 
-        // Optional: Trigger next steps or UI updates
+        // Redirect to dashboard or store management page
+        router.push('/dashboard');
       } else {
         toast({
-          title: 'Connection Failed: Unable to connect to Shopify store. Check your credentials.',
+          title: 'Connection Failed',
+          description: 'Unable to verify store credentials. Please check your domain and access token.',
           variant: 'destructive'
         });
       }
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'An unexpected error occurred';
-
+      console.error('Store connection error:', error);
       toast({
-        title: `Connection Error: ${errorMessage}`,
+        title: 'Connection Error',
+        description: 'An unexpected error occurred while connecting to the store.',
         variant: 'destructive'
       });
     } finally {
@@ -95,27 +89,27 @@ export function ShopifyStoreConnectionForm() {
               id="shopDomain"
               placeholder="your-store.myshopify.com"
               value={shopDomain}
-              onChange={(e) => setShopDomain(e.target.value.trim())}
+              onChange={(e) => setShopDomain(e.target.value)}
+              disabled={isConnecting}
             />
           </div>
-          
           <div>
             <Label htmlFor="accessToken">Access Token</Label>
             <Input
               id="accessToken"
               type="password"
-              placeholder="Shopify Access Token"
+              placeholder="Enter your Shopify access token"
               value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value.trim())}
+              onChange={(e) => setAccessToken(e.target.value)}
+              disabled={isConnecting}
             />
           </div>
-
           <Button 
             onClick={handleConnection} 
-            className="w-full"
             disabled={isConnecting}
+            className="w-full"
           >
-            {isConnecting ? 'Connecting...' : 'Connect to Shopify'}
+            {isConnecting ? 'Connecting...' : 'Connect Store'}
           </Button>
         </div>
       </CardContent>

@@ -191,11 +191,19 @@ export default function StoreConnectionPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-4xl space-y-8">
+        {/* Page Heading */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-[#EAEAEA]">Connect Store</h1>
+          <p className="text-[#C0C0C0]">
+            Connect your Shopify store to import products and manage data
+          </p>
+        </div>
+
         {/* Store Connection Form */}
-        <div className="bg-white shadow-md rounded-lg p-8">
-          <h2 className="text-center text-3xl font-extrabold text-gray-900 mb-6">
+        <div className="bg-[#1A1A1A] shadow-md rounded-lg p-8 border border-[#2A2A2A]">
+          <h2 className="text-3xl font-extrabold text-[#EAEAEA] mb-6">
             Connect Your Shopify Store
           </h2>
           
@@ -203,7 +211,7 @@ export default function StoreConnectionPage() {
             {/* Existing form inputs */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="storeUrl" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="storeUrl" className="block text-sm font-medium text-[#C0C0C0]">
                   Store URL
                 </label>
                 <input
@@ -213,22 +221,22 @@ export default function StoreConnectionPage() {
                   required
                   className={`mt-1 block w-full rounded-md border ${
                     validationErrors.storeUrl 
-                      ? 'border-red-500 text-red-900' 
-                      : 'border-gray-300 text-gray-900'
-                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                      ? 'border-destructive text-destructive' 
+                      : 'border-[#2A2A2A] text-[#EAEAEA] bg-[#2A2A2A]'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00A6B2]`}
                   placeholder="your-store.myshopify.com"
                   value={formData.storeUrl}
                   onChange={handleInputChange}
                 />
                 {validationErrors.storeUrl && (
-                  <p className="mt-1 text-xs text-red-500">
+                  <p className="mt-1 text-xs text-destructive">
                     {validationErrors.storeUrl}
                   </p>
                 )}
               </div>
               {/* Add other input fields similarly */}
               <div>
-                <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="apiKey" className="block text-sm font-medium text-[#C0C0C0]">
                   API Key (Optional)
                 </label>
                 <input
@@ -237,21 +245,21 @@ export default function StoreConnectionPage() {
                   type="text"
                   className={`mt-1 block w-full rounded-md border ${
                     validationErrors.apiKey 
-                      ? 'border-red-500 text-red-900' 
-                      : 'border-gray-300 text-gray-900'
-                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                      ? 'border-destructive text-destructive' 
+                      : 'border-[#2A2A2A] text-[#EAEAEA] bg-[#2A2A2A]'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00A6B2]`}
                   placeholder="API Key (Optional)"
                   value={formData.apiKey}
                   onChange={handleInputChange}
                 />
                 {validationErrors.apiKey && (
-                  <p className="mt-1 text-xs text-red-500">
+                  <p className="mt-1 text-xs text-destructive">
                     {validationErrors.apiKey}
                   </p>
                 )}
               </div>
               <div>
-                <label htmlFor="apiSecret" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="apiSecret" className="block text-sm font-medium text-[#C0C0C0]">
                   API Secret (Optional)
                 </label>
                 <input
@@ -260,21 +268,21 @@ export default function StoreConnectionPage() {
                   type="text"
                   className={`mt-1 block w-full rounded-md border ${
                     validationErrors.apiSecret 
-                      ? 'border-red-500 text-red-900' 
-                      : 'border-gray-300 text-gray-900'
-                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                      ? 'border-destructive text-destructive' 
+                      : 'border-[#2A2A2A] text-[#EAEAEA] bg-[#2A2A2A]'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00A6B2]`}
                   placeholder="API Secret (Optional)"
                   value={formData.apiSecret}
                   onChange={handleInputChange}
                 />
                 {validationErrors.apiSecret && (
-                  <p className="mt-1 text-xs text-red-500">
+                  <p className="mt-1 text-xs text-destructive">
                     {validationErrors.apiSecret}
                   </p>
                 )}
               </div>
               <div>
-                <label htmlFor="accessToken" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="accessToken" className="block text-sm font-medium text-[#C0C0C0]">
                   Access Token (Optional)
                 </label>
                 <input
@@ -283,15 +291,15 @@ export default function StoreConnectionPage() {
                   type="text"
                   className={`mt-1 block w-full rounded-md border ${
                     validationErrors.accessToken 
-                      ? 'border-red-500 text-red-900' 
-                      : 'border-gray-300 text-gray-900'
-                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
+                      ? 'border-destructive text-destructive' 
+                      : 'border-[#2A2A2A] text-[#EAEAEA] bg-[#2A2A2A]'
+                  } shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00A6B2]`}
                   placeholder="Access Token (Optional)"
                   value={formData.accessToken}
                   onChange={handleInputChange}
                 />
                 {validationErrors.accessToken && (
-                  <p className="mt-1 text-xs text-red-500">
+                  <p className="mt-1 text-xs text-destructive">
                     {validationErrors.accessToken}
                   </p>
                 )}
@@ -312,8 +320,8 @@ export default function StoreConnectionPage() {
 
         {/* Connected Stores Section */}
         {stores.length > 0 && (
-          <div className="bg-white shadow-md rounded-lg p-8 mt-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="bg-[#1A1A1A] shadow-md rounded-lg p-8 mt-8 border border-[#2A2A2A]">
+            <h3 className="text-xl font-semibold text-[#EAEAEA] mb-4">
               Connected Stores
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -331,7 +339,7 @@ export default function StoreConnectionPage() {
                       {store.status}
                     </Badge>
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-[#C0C0C0]">
                     <p>URL: {store.url}</p>
                     <p>Products: {store.products}</p>
                     <p>Last Sync: {store.lastSync}</p>

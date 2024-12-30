@@ -21,7 +21,7 @@ export default function HelpPage() {
       icon: HelpCircle,
       content: (
         <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-semibold text-[#EAEAEA]">Frequently Asked Questions</h2>
           {[
             {
               question: 'How do I upload my Shopify products?',
@@ -36,9 +36,9 @@ export default function HelpPage() {
               answer: 'Yes, you can connect and manage multiple Shopify stores from the Integrations section in Settings.'
             }
           ].map((faq, index) => (
-            <div key={index} className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">{faq.question}</h3>
-              <p className="text-gray-600">{faq.answer}</p>
+            <div key={index} className="bg-[#2A2A2A] p-4 rounded-lg">
+              <h3 className="font-semibold mb-2 text-[#EAEAEA]">{faq.question}</h3>
+              <p className="text-[#C0C0C0]">{faq.answer}</p>
             </div>
           ))}
         </div>
@@ -50,7 +50,7 @@ export default function HelpPage() {
       icon: Book,
       content: (
         <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">User Documentation</h2>
+          <h2 className="text-2xl font-semibold text-[#EAEAEA]">User Documentation</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {[
               { title: 'Getting Started Guide', description: 'Learn how to use our Shopify CSV tool' },
@@ -60,11 +60,11 @@ export default function HelpPage() {
             ].map((doc, index) => (
               <div 
                 key={index} 
-                className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="bg-[#2A2A2A] border border-[#1A1A1A] rounded-lg p-4 hover:shadow-md transition-shadow"
               >
-                <h3 className="font-semibold mb-2">{doc.title}</h3>
-                <p className="text-gray-600 text-sm">{doc.description}</p>
-                <button className="mt-2 text-blue-600 hover:underline">Read More</button>
+                <h3 className="font-semibold mb-2 text-[#EAEAEA]">{doc.title}</h3>
+                <p className="text-[#C0C0C0] text-sm">{doc.description}</p>
+                <button className="mt-2 text-[#00A6B2] hover:underline">Read More</button>
               </div>
             ))}
           </div>
@@ -77,24 +77,28 @@ export default function HelpPage() {
       icon: MessageCircle,
       content: (
         <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Contact Support</h2>
+          <h2 className="text-2xl font-semibold text-[#EAEAEA]">Contact Support</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <Mail className="w-12 h-12 text-blue-500 mb-4" />
-              <h3 className="font-semibold mb-2">Email Support</h3>
-              <p className="text-gray-600 mb-4">Get help via email</p>
+            <div 
+              className="bg-[#2A2A2A] p-6 rounded-lg border border-[#1A1A1A]"
+            >
+              <Mail className="w-12 h-12 text-[#00A6B2] mb-4" />
+              <h3 className="font-semibold mb-2 text-[#EAEAEA]">Email Support</h3>
+              <p className="text-[#C0C0C0] mb-4">Get help via email</p>
               <a 
                 href="mailto:support@shopifycsv.com" 
-                className="text-blue-600 hover:underline"
+                className="text-[#00A6B2] hover:underline"
               >
                 support@shopifycsv.com
               </a>
             </div>
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <MessageCircle className="w-12 h-12 text-green-500 mb-4" />
-              <h3 className="font-semibold mb-2">Live Chat</h3>
-              <p className="text-gray-600 mb-4">Instant support during business hours</p>
-              <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+            <div 
+              className="bg-[#2A2A2A] p-6 rounded-lg border border-[#1A1A1A]"
+            >
+              <MessageCircle className="w-12 h-12 text-[#00A6B2] mb-4" />
+              <h3 className="font-semibold mb-2 text-[#EAEAEA]">Live Chat</h3>
+              <p className="text-[#C0C0C0] mb-4">Instant support during business hours</p>
+              <button className="bg-[#00A6B2] text-white px-4 py-2 rounded-md hover:bg-[#008A94]">
                 Start Chat
               </button>
             </div>
@@ -108,7 +112,7 @@ export default function HelpPage() {
       icon: Video,
       content: (
         <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Video Tutorials</h2>
+          <h2 className="text-2xl font-semibold text-[#EAEAEA]">Video Tutorials</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {[
               { 
@@ -129,7 +133,7 @@ export default function HelpPage() {
             ].map((tutorial, index) => (
               <div 
                 key={index} 
-                className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-[#2A2A2A] border border-[#1A1A1A] rounded-lg overflow-hidden hover:shadow-md transition-shadow"
               >
                 <img 
                   src={tutorial.thumbnail} 
@@ -137,9 +141,9 @@ export default function HelpPage() {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="font-semibold mb-2">{tutorial.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{tutorial.description}</p>
-                  <button className="text-blue-600 hover:underline flex items-center">
+                  <h3 className="font-semibold mb-2 text-[#EAEAEA]">{tutorial.title}</h3>
+                  <p className="text-[#C0C0C0] text-sm mb-4">{tutorial.description}</p>
+                  <button className="text-[#00A6B2] hover:underline flex items-center">
                     <Video className="w-5 h-5 mr-2" /> Watch Tutorial
                   </button>
                 </div>
@@ -152,31 +156,43 @@ export default function HelpPage() {
   ];
 
   return (
-    <AppLayout>
-      <div className="grid md:grid-cols-4 gap-6">
-        {/* Sidebar Navigation */}
-        <div className="bg-white shadow rounded-lg p-4 space-y-2">
-          {helpSections.map((section) => (
-            <button
-              key={section.id}
-              onClick={() => setActiveSection(section.id)}
-              className={`
-                w-full flex items-center space-x-3 p-3 rounded-md transition-colors
-                ${activeSection === section.id 
-                  ? 'bg-blue-50 text-blue-600' 
-                  : 'hover:bg-gray-100 text-gray-700'
-                }
-              `}
-            >
-              <section.icon className="w-5 h-5" />
-              <span>{section.name}</span>
-            </button>
-          ))}
+    <AppLayout className="bg-[#121212] text-[#EAEAEA]">
+      <div className="container mx-auto px-4 py-8 min-h-screen">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-[#EAEAEA]">Help & Support</h1>
+          <p className="text-[#C0C0C0]">
+            Find answers to your questions and get assistance
+          </p>
         </div>
+        <div className="grid md:grid-cols-4 gap-6">
+          {/* Sidebar Navigation */}
+          <div 
+            className="bg-[#1A1A1A] shadow rounded-lg p-4 space-y-2 border border-[#2A2A2A]"
+          >
+            {helpSections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={`
+                  w-full flex items-center space-x-3 p-3 rounded-md transition-colors
+                  ${activeSection === section.id 
+                    ? 'bg-[#00A6B2]/20 text-[#00A6B2]' 
+                    : 'hover:bg-[#2A2A2A] text-[#C0C0C0]'
+                  }
+                `}
+              >
+                <section.icon className="w-5 h-5 text-[#00A6B2]" />
+                <span>{section.name}</span>
+              </button>
+            ))}
+          </div>
 
-        {/* Content Area */}
-        <div className="md:col-span-3 bg-white shadow rounded-lg p-8">
-          {helpSections.find(section => section.id === activeSection)?.content}
+          {/* Content Area */}
+          <div 
+            className="md:col-span-3 bg-[#1A1A1A] shadow rounded-lg p-8 border border-[#2A2A2A]"
+          >
+            {helpSections.find(section => section.id === activeSection)?.content}
+          </div>
         </div>
       </div>
     </AppLayout>

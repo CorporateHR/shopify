@@ -57,11 +57,11 @@ export function DrawerProvider({ children }: { children: ReactNode }) {
         <DrawerContent 
           showCloseButton={true}
           onClose={closeDrawer}
-          className="bg-white"
+          className="bg-[#1A1A1A] border-t border-[#2A2A2A] text-[#EAEAEA]"
         >
           {drawerContent?.title && (
-            <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-semibold">{drawerContent.title}</h2>
+            <div className="px-6 py-4 border-b border-[#2A2A2A]">
+              <h2 className="text-xl font-semibold text-[#EAEAEA]">{drawerContent.title}</h2>
             </div>
           )}
           <div className="flex-1">
