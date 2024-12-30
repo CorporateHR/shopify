@@ -6,38 +6,38 @@ import { ArrowRight, FileSpreadsheet, Upload, Download, Zap, Shield, BarChart3, 
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#121212]">
       {/* Header */}
-      <header className="border-b">
+      <header className="border-[#2A2A2A] bg-[#121212]">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <FileSpreadsheet className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">Shopify CSV</span>
+            <FileSpreadsheet className="h-6 w-6 text-[#00A6B2]" />
+            <span className="font-bold text-xl text-[#EAEAEA]">Shopify CSV</span>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost">Features</Button>
-            <Button variant="ghost">Pricing</Button>
-            <Button variant="ghost">Documentation</Button>
-            <Button>Get Started</Button>
+            <Button variant="ghost" className="text-[#C0C0C0] hover:text-[#EAEAEA] hover:bg-[#2A2A2A]">Features</Button>
+            <Button variant="ghost" className="text-[#C0C0C0] hover:text-[#EAEAEA] hover:bg-[#2A2A2A]">Pricing</Button>
+            <Button variant="ghost" className="text-[#C0C0C0] hover:text-[#EAEAEA] hover:bg-[#2A2A2A]">Documentation</Button>
+            <Button className="bg-[#00A6B2] text-white hover:bg-[#008A94]">Get Started</Button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-[#121212]">
         <div className="container mx-auto text-center max-w-4xl">
-          <h1 className="text-5xl font-bold tracking-tight mb-6">
+          <h1 className="text-5xl font-bold tracking-tight mb-6 text-[#EAEAEA]">
             Transform Your Product Data for Shopify in Seconds
           </h1>
-          <p className="text-xl text-muted-foreground mb-8">
+          <p className="text-xl text-[#C0C0C0] mb-8">
             Effortlessly convert your product data from any format into Shopify-ready CSV files.
             Save hours of manual work with our intelligent data mapping system.
           </p>
           <div className="flex justify-center gap-4">
-            <Button size="lg" className="gap-2">
+            <Button size="lg" className="bg-[#00A6B2] text-white hover:bg-[#008A94] gap-2">
               Start Converting <ArrowRight className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline">
+            <Button size="lg" variant="outline" className="border-[#2A2A2A] text-[#EAEAEA] hover:bg-[#2A2A2A]">
               Watch Demo
             </Button>
           </div>
@@ -45,9 +45,9 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/50">
+      <section className="py-20 bg-[#1A1A1A]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-3xl font-bold text-center mb-12 text-[#EAEAEA]">
             Everything You Need for Seamless Product Data Migration
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -88,7 +88,7 @@ export default function Home() {
       {/* How It Works Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-3xl font-bold text-center mb-12 text-[#EAEAEA]">
             How It Works
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -112,36 +112,36 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
+      <section className="py-20 bg-[#1A1A1A]">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">
+          <h2 className="text-3xl font-bold mb-6 text-white">
             Ready to Streamline Your Product Data Migration?
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p className="text-xl mb-8 text-white opacity-90">
             Join thousands of Shopify merchants who trust us with their product data
           </p>
-          <Button size="lg" variant="secondary" className="gap-2">
+          <Button size="lg" className="bg-[#00A6B2] text-white hover:bg-[#008A94] gap-2">
             Get Started for Free <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12">
+      <footer className="border-t border-[#2A2A2A] py-12 bg-[#121212]">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <FileSpreadsheet className="h-6 w-6 text-primary" />
-                <span className="font-bold text-xl">Shopify CSV</span>
+                <FileSpreadsheet className="h-6 w-6 text-[#00A6B2]" />
+                <span className="font-bold text-xl text-[#EAEAEA]">Shopify CSV</span>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#C0C0C0]">
                 Making product data migration simple and efficient for Shopify merchants.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="font-semibold mb-4 text-[#EAEAEA]">Product</h3>
+              <ul className="space-y-2 text-sm text-[#C0C0C0]">
                 <li>Features</li>
                 <li>Pricing</li>
                 <li>Documentation</li>
@@ -149,8 +149,8 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="font-semibold mb-4 text-[#EAEAEA]">Company</h3>
+              <ul className="space-y-2 text-sm text-[#C0C0C0]">
                 <li>About</li>
                 <li>Blog</li>
                 <li>Careers</li>
@@ -158,15 +158,15 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="font-semibold mb-4 text-[#EAEAEA]">Legal</h3>
+              <ul className="space-y-2 text-sm text-[#C0C0C0]">
                 <li>Privacy Policy</li>
                 <li>Terms of Service</li>
                 <li>Cookie Policy</li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
+          <div className="mt-12 pt-8 border-t border-[#2A2A2A] text-center text-sm text-[#C0C0C0]">
             {new Date().getFullYear()} Shopify CSV. All rights reserved.
           </div>
         </div>
@@ -185,12 +185,12 @@ function FeatureCard({
   description: string 
 }) {
   return (
-    <Card className="p-6">
-      <div className="mb-4 text-primary">
+    <Card className="p-6 bg-[#1A1A1A] border-[#2A2A2A] hover:bg-[#2A2A2A] transition-colors">
+      <div className="mb-4 text-[#00A6B2]">
         <Icon className="w-8 h-8" />
       </div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
+      <h3 className="text-lg font-semibold mb-2 text-[#EAEAEA]">{title}</h3>
+      <p className="text-[#C0C0C0]">{description}</p>
     </Card>
   );
 }
@@ -199,18 +199,18 @@ function StepCard({
   number, 
   title, 
   description 
-}: { 
-  number: number, 
-  title: string, 
-  description: string 
+}: {
+  number: number,
+  title: string,
+  description: string
 }) {
   return (
-    <Card className="p-6 relative">
-      <div className="text-6xl font-bold text-primary/10 absolute top-4 right-4">
+    <div className="relative p-6 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] hover:bg-[#2A2A2A] transition-colors">
+      <div className="text-4xl font-bold text-[#00A6B2] mb-4">
         {number}
       </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </Card>
+      <h3 className="text-lg font-semibold mb-2 text-[#EAEAEA]">{title}</h3>
+      <p className="text-[#C0C0C0]">{description}</p>
+    </div>
   );
 }

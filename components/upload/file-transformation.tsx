@@ -15,9 +15,9 @@ export function FileTransformationPreview() {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className="bg-[#1A1A1A] shadow-md rounded-lg p-6 border border-[#2A2A2A]">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">
+        <h2 className="text-xl font-semibold text-[#EAEAEA]">
           File Transformation Preview
         </h2>
         <div className="flex items-center space-x-2 text-green-600">
@@ -29,16 +29,16 @@ export function FileTransformationPreview() {
       <div className="grid md:grid-cols-2 gap-6">
         <div>
           <div className="flex items-center space-x-3 mb-4">
-            <Table className="w-6 h-6 text-gray-500" />
+            <Table className="w-6 h-6 text-[#C0C0C0]" />
             <h3 className="font-medium">File Details</h3>
           </div>
           <div className="space-y-2 text-sm">
             <p>
-              <span className="text-gray-600">File Name:</span>{' '}
+              <span className="text-[#C0C0C0]">File Name:</span>{' '}
               {mockTransformationData.fileName}
             </p>
             <p>
-              <span className="text-gray-600">Total Rows:</span>{' '}
+              <span className="text-[#C0C0C0]">Total Rows:</span>{' '}
               {mockTransformationData.totalRows}
             </p>
           </div>
@@ -46,18 +46,18 @@ export function FileTransformationPreview() {
 
         <div>
           <div className="flex items-center space-x-3 mb-4">
-            <Columns className="w-6 h-6 text-gray-500" />
+            <Columns className="w-6 h-6 text-[#C0C0C0]" />
             <h3 className="font-medium">Column Detection</h3>
           </div>
           <div className="space-y-2">
             {mockTransformationData.columns.map((column, index) => (
               <div 
                 key={index} 
-                className="flex justify-between items-center text-sm"
+                className="flex justify-between items-center text-sm bg-[#2A2A2A] p-3 rounded-lg border border-[#1A1A1A]"
               >
-                <span>{column.name}</span>
+                <span className="font-medium text-[#EAEAEA]">{column.name}</span>
                 <div className="flex items-center space-x-2">
-                  <span className="text-gray-500">{column.type}</span>
+                  <span className="text-sm text-[#C0C0C0]">{column.type}</span>
                   {column.detected && (
                     <FileCheck className="w-4 h-4 text-green-500" />
                   )}

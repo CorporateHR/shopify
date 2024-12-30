@@ -46,11 +46,11 @@ const MappingProgress = ({ mappedFields, totalFields }) => {
     <div className="mt-4">
       <div className="flex justify-between mb-1">
         <span className="text-sm font-medium">Mapping Progress</span>
-        <span className="text-sm text-gray-500">{mappedFields}/{totalFields} fields mapped</span>
+        <span className="text-sm text-[#C0C0C0]">{mappedFields}/{totalFields} fields mapped</span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
+      <div className="w-full bg-[#2A2A2A] rounded-full h-2">
         <div 
-          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+          className="bg-[#00A6B2] h-2 rounded-full transition-all duration-300" 
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -63,13 +63,13 @@ const BulkActions = ({ onAutoMap, onClearAll }) => {
     <div className="flex gap-4 mb-6">
       <button 
         onClick={onAutoMap}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        className="px-4 py-2 bg-[#00A6B2] text-[#EAEAEA] rounded-md hover:bg-[#00A6B2]/90"
       >
         Auto-Map Fields
       </button>
       <button 
         onClick={onClearAll}
-        className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+        className="px-4 py-2 border border-[#2A2A2A] rounded-md hover:bg-[#2A2A2A]"
       >
         Clear All Mappings
       </button>
@@ -79,13 +79,13 @@ const BulkActions = ({ onAutoMap, onClearAll }) => {
 
 const MappingRow = ({ sourceField, onMapField }) => {
   return (
-    <div className="flex items-center gap-4 p-2 hover:bg-gray-50">
+    <div className="flex items-center gap-4 p-2 hover:bg-[#2A2A2A]">
       <div className="flex-1">
         <p className="font-medium">{sourceField}</p>
-        <p className="text-sm text-gray-500">Source Column</p>
+        <p className="text-sm text-[#C0C0C0]">Source Column</p>
       </div>
       
-      <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg className="w-6 h-6 text-[#C0C0C0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
       </svg>
       
@@ -104,34 +104,36 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg border-r">
-      <div className="p-6 border-b">
-        <h1 className="text-2xl font-bold text-gray-800">Shopify CSV</h1>
-        <p className="text-sm text-gray-500">Data Management Tool</p>
+    <div className="fixed left-0 top-0 h-full w-64 bg-[#1A1A1A] shadow-lg border-r border-[#2A2A2A]">
+      <div className="p-6 border-b border-[#2A2A2A]">
+        <h1 className="text-2xl font-bold text-[#EAEAEA]">Shopify CSV</h1>
+        <p className="text-sm text-[#C0C0C0]">Data Management Tool</p>
       </div>
 
-      <nav className="mt-8">
+      <nav className="mt-6">
         {navItems.map((item) => (
           <Link 
             key={item.href}
             href={item.href}
             className={`
-              flex items-center px-6 py-3 transition-colors duration-200
+              block px-6 py-3 transition-colors 
               ${pathname === item.href 
-                ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' 
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-[#00A6B2]/20 text-[#00A6B2] border-r-4 border-[#00A6B2]' 
+                : 'text-[#C0C0C0] hover:bg-[#2A2A2A]'
               }
             `}
           >
-            <item.icon className="w-5 h-5 mr-3" />
-            <span className="font-medium">{item.name}</span>
+            <div className="flex items-center space-x-3">
+              <item.icon className="w-5 h-5" />
+              <span>{item.name}</span>
+            </div>
           </Link>
         ))}
       </nav>
 
-      <div className="absolute bottom-0 left-0 right-0 p-6 border-t">
+      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-[#2A2A2A]">
         <button 
-          className="w-full flex items-center justify-center py-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+          className="w-full flex items-center justify-center py-2 text-[#C0C0C0] hover:bg-[#2A2A2A] rounded-md transition-colors"
         >
           <LogOut className="w-5 h-5 mr-2" />
           Logout

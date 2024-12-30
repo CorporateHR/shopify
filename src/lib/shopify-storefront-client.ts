@@ -1,9 +1,11 @@
-import { createStorefrontClient } from '@shopify/hydrogen';
+import { createStorefrontClient, StorefrontClient, I18nBase } from '@shopify/hydrogen';
 
 // Storefront API configuration
-export const shopifyStorefrontClient = createStorefrontClient({
+export const shopifyStorefrontClient = createStorefrontClient<I18nBase>({
   storeDomain: process.env.SHOPIFY_STORE_DOMAIN || '',
-  storefrontAccessToken: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || '',
+  publicStorefrontToken: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || '',
+  // Explicitly type the client
+  i18n: { language: 'EN', country: 'US' }
 });
 
 // Utility function to handle GraphQL queries
@@ -12,18 +14,9 @@ export async function shopifyStorefrontQuery<T = any>(
   variables: Record<string, any> = {}
 ): Promise<T> {
   try {
-    const response = await shopifyStorefrontClient.query({
-      query,
-      variables
-    });
+    const response = await shopifyStorefrontClient.query(query, { variables });
 
-    if (response.errors) {
-      throw new Error(
-        `Shopify Storefront API Error: ${JSON.stringify(response.errors)}`
-      );
-    }
-
-    return response.data as T;
+    return response as T;
   } catch (error) {
     console.error('Storefront API Query Error:', error);
     throw error;
@@ -36,18 +29,9 @@ export async function shopifyStorefrontMutation<T = any>(
   variables: Record<string, any> = {}
 ): Promise<T> {
   try {
-    const response = await shopifyStorefrontClient.mutation({
-      mutation,
-      variables
-    });
+    const response = await shopifyStorefrontClient.query(mutation, { variables });
 
-    if (response.errors) {
-      throw new Error(
-        `Shopify Storefront API Mutation Error: ${JSON.stringify(response.errors)}`
-      );
-    }
-
-    return response.data as T;
+    return response as T;
   } catch (error) {
     console.error('Storefront API Mutation Error:', error);
     throw error;
