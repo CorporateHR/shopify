@@ -94,6 +94,7 @@ const DrawerContent = React.forwardRef<
       toast({
         title: 'Product Added Successfully',
         description: `Product "${data.title}" has been created.`,
+        variant: 'default' as const
       });
       
       form.reset();
@@ -102,7 +103,7 @@ const DrawerContent = React.forwardRef<
       toast({
         title: 'Error',
         description: 'Failed to add product.',
-        variant: 'destructive',
+        variant: 'destructive' as const
       });
     } finally {
       setIsSubmitting(false);
@@ -111,7 +112,7 @@ const DrawerContent = React.forwardRef<
 
   return (
     <DrawerPortal>
-      <DrawerOverlay />
+      <DrawerOverlay inert={true} />
       <DrawerPrimitive.Content
         ref={ref}
         className={cn(
@@ -125,6 +126,14 @@ const DrawerContent = React.forwardRef<
         {...props}
       >
         <div className="mx-auto w-12 h-1.5 my-4 rounded-full bg-[#2A2A2A]" />
+        <DrawerTitle className="sr-only">
+          {mode === 'create-product' ? 'Create New Product' : 'Drawer'}
+        </DrawerTitle>
+        <DrawerDescription className="sr-only">
+          {mode === 'create-product' 
+            ? 'Fill out the form to add a new product to your inventory' 
+            : 'Additional drawer content'}
+        </DrawerDescription>
         {mode === 'create-product' ? (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

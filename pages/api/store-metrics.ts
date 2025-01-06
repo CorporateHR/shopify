@@ -9,12 +9,6 @@ interface StoreMetrics {
   totalRevenue: number;
 }
 
-// Interface for GET request parameters
-interface GetRequestParams {
-  page?: number;
-  limit?: number;
-}
-
 export default async function handler(
   req: NextApiRequest, 
   res: NextApiResponse<StoreMetrics | { error: string }>
@@ -24,24 +18,24 @@ export default async function handler(
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // Check for Shopify store credentials
+  const shopName = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_DOMAIN;
+  const accessToken = process.env.SHOPIFY_ACCESS_TOKEN;
+
+  if (!shopName || !accessToken) {
+    return res.status(401).json({ 
+      error: 'Shopify store credentials are not configured' 
+    });
+  }
+
   try {
-    // Retrieve store credentials from environment or session
-    const shopName = process.env.SHOPIFY_STORE_DOMAIN;
-    const accessToken = process.env.SHOPIFY_ACCESS_TOKEN;
-
-    if (!shopName || !accessToken) {
-      return res.status(401).json({ 
-        error: 'Shopify store credentials are not configured' 
-      });
-    }
-
     // Initialize Shopify client
     const shopify = new Shopify({
-      shopName: shopName,
-      accessToken: accessToken
+      shopName,
+      accessToken
     });
 
-    // Fetch store metrics
+    // Fetch store metrics concurrently
     const [
       productsCount,
       ordersCount,
@@ -51,33 +45,26 @@ export default async function handler(
       shopify.product.count(),
       shopify.order.count(),
       shopify.customer.count(),
-      shopify.order.list({ status: 'any' })
+      shopify.order.list({ limit: 250 })
     ]);
 
     // Calculate total revenue
-    const calculateTotalRevenue = (total: number, order: { total_price: string }): number => {
+    const totalRevenue = orders.reduce((total, order) => {
       return total + parseFloat(order.total_price || '0');
-    };
+    }, 0);
 
-    const totalRevenue = orders.reduce(calculateTotalRevenue, 0);
-
-    // Prepare and send metrics
-    const metrics: StoreMetrics = {
+    // Return store metrics
+    return res.status(200).json({
       totalProducts: productsCount,
       totalOrders: ordersCount,
       totalCustomers: customersCount,
       totalRevenue: parseFloat(totalRevenue.toFixed(2))
-    };
+    });
 
-    res.status(200).json(metrics);
   } catch (error) {
-    console.error('Store Metrics Fetch Error:', error);
-    
-    // Provide a meaningful error response
-    res.status(500).json({ 
-      error: error instanceof Error 
-        ? error.message 
-        : 'Failed to fetch store metrics' 
+    console.error('Store metrics retrieval error:', error);
+    return res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Failed to retrieve store metrics' 
     });
   }
 }

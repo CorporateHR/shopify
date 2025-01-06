@@ -6,7 +6,6 @@ export default function YourComponent() {
 
   const handleOpenDrawer = () => {
     openDrawer({
-      content: 'store-dashboard',
       title: 'Store Dashboard',
       props: { /* any props you want to pass */ }
     });

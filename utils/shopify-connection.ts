@@ -1,5 +1,20 @@
+import { 
+  shopifyApi, 
+  LATEST_API_VERSION,
+  Session,
+  ApiVersion
+} from '@shopify/shopify-api';
+import { 
+  RestClientParams,
+  GetRequestParams,
+  PostRequestParams
+} from '@shopify/shopify-api/lib/clients/types';
+
+// Ensure Shopify Context is initialized only once
+let isShopifyInitialized = false;
+
 // Mock Shopify API type for type safety
-interface ShopifyAPI {
+interface ShopifyAPIInterface {
   shop: {
     get: () => Promise<{ name: string }>;
   };
@@ -15,70 +30,141 @@ interface ProductUploadError {
   error: string;
 }
 
+// Define a more specific interface for connection configuration
 export interface ShopifyConnectionConfig {
   shopDomain: string;
   accessToken: string;
+  apiKey: string;
+  apiSecret: string;
 }
 
 export class ShopifyStoreConnection {
-  private shopify: ShopifyAPI;
+  private shopDomain: string;
+  private accessToken: string;
+  private apiKey: string;
+  private apiSecret: string;
+  private shopifyClient!: ReturnType<typeof shopifyApi>;
 
   constructor(config: ShopifyConnectionConfig) {
-    // In a real implementation, this would use the actual Shopify API library
-    this.shopify = {
-      shop: {
-        get: async () => ({ name: config.shopDomain }),
-      },
-      product: {
-        list: async () => [],
-        create: async () => ({}),
-      }
-    };
+    // Validate inputs
+    this.validateInputs(config);
+
+    this.shopDomain = config.shopDomain.replace('https://', '').replace('http://', '');
+    this.accessToken = config.accessToken;
+    this.apiKey = config.apiKey;
+    this.apiSecret = config.apiSecret;
+
+    // Initialize Shopify context if not already done
+    this.initializeShopifyContext();
   }
 
-  // Validate connection
+  private validateInputs(config: ShopifyConnectionConfig) {
+    const requiredFields: (keyof ShopifyConnectionConfig)[] = [
+      'shopDomain', 'accessToken', 'apiKey', 'apiSecret'
+    ];
+
+    for (const field of requiredFields) {
+      if (!config[field] || config[field].trim() === '') {
+        throw new Error(`${field} is required`);
+      }
+    }
+
+    if (!config.shopDomain.endsWith('.myshopify.com')) {
+      throw new Error('Shop domain must end with .myshopify.com');
+    }
+  }
+
+  private initializeShopifyContext() {
+    if (!isShopifyInitialized) {
+      try {
+        // Initialize Shopify Client
+        this.shopifyClient = shopifyApi({
+          apiKey: this.apiKey,
+          apiSecretKey: this.apiSecret,
+          scopes: ['read_products', 'write_products', 'read_orders', 'read_customers'],
+          hostName: this.shopDomain.replace('.myshopify.com', ''),
+          isEmbeddedApp: false,
+          apiVersion: LATEST_API_VERSION
+        });
+
+        isShopifyInitialized = true;
+      } catch (error) {
+        console.error('Detailed Shopify Context Initialization Error:', error);
+        throw new Error(`Failed to initialize Shopify Context: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+  }
+
   async testConnection(): Promise<boolean> {
     try {
+      // Create a REST client for this specific connection
+      const client = new this.shopifyClient.clients.Rest({
+        shop: this.shopDomain,
+        accessToken: this.accessToken
+      });
+
       // Attempt to fetch shop information
-      const shop = await this.shopify.shop.get();
-      console.log('Successfully connected to Shopify store:', shop.name);
+      const response = await client.get({
+        path: 'shop',
+        query: {}
+      });
+
+      console.log('Shopify connection successful:', response.body);
       return true;
     } catch (error) {
-      console.error('Shopify connection failed:', error);
+      console.error('Shopify connection test failed:', error);
       return false;
     }
   }
 
-  // Fetch product fields
   async getProductFields(): Promise<string[]> {
     try {
-      // Retrieve a sample product to get its fields
-      const products = await this.shopify.product.list({ limit: 1 });
+      // Create a REST client for this specific connection
+      const client = new this.shopifyClient.clients.Rest({
+        shop: this.shopDomain,
+        accessToken: this.accessToken
+      });
       
-      if (products.length > 0) {
-        return Object.keys(products[0]);
-      }
-      
-      // Fallback fields if no products found
-      return [
-        'id', 'title', 'body_html', 'vendor', 'product_type', 
-        'created_at', 'handle', 'updated_at', 'published_at', 
-        'template_suffix', 'status', 'published_scope', 
-        'tags', 'admin_graphql_api_id'
-      ];
+      const response = await client.get({
+        path: 'products',
+        query: { limit: 1 }
+      });
+
+      // Extract field names from the first product
+      const products = (response.body as any).products;
+      return products.length > 0 ? Object.keys(products[0]) : [];
     } catch (error) {
-      console.error('Failed to retrieve product fields:', error);
+      console.error('Failed to get product fields:', error);
       return [];
     }
   }
 
-  // Upload products in bulk
+  async getProducts(limit: number = 50): Promise<any[]> {
+    try {
+      // Create a REST client for this specific connection
+      const client = new this.shopifyClient.clients.Rest({
+        shop: this.shopDomain,
+        accessToken: this.accessToken
+      });
+      
+      const response = await client.get({
+        path: 'products',
+        query: { limit }
+      });
+
+      return (response.body as any).products || [];
+    } catch (error) {
+      console.error('Failed to get products:', error);
+      return [];
+    }
+  }
+
   async uploadProducts(products: Record<string, any>[]): Promise<{ 
     successful: number, 
     failed: number, 
     errors: ProductUploadError[] 
   }> {
-    const results = {
+    const result = {
       successful: 0,
       failed: 0,
       errors: [] as ProductUploadError[]
@@ -86,25 +172,34 @@ export class ShopifyStoreConnection {
 
     for (const product of products) {
       try {
-        await this.shopify.product.create(product);
-        results.successful++;
+        // Create a REST client for this specific connection
+        const client = new this.shopifyClient.clients.Rest({
+          shop: this.shopDomain,
+          accessToken: this.accessToken
+        });
+        
+        const response = await client.post({
+          path: 'products',
+          data: { product }
+        });
+
+        result.successful++;
       } catch (error) {
-        results.failed++;
-        results.errors.push({
+        result.failed++;
+        result.errors.push({
           product,
           error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
     }
 
-    return results;
+    return result;
   }
 }
 
 // Utility function to create connection
 export const createShopifyConnection = (
-  shopDomain: string, 
-  accessToken: string
+  config: ShopifyConnectionConfig
 ): ShopifyStoreConnection => {
-  return new ShopifyStoreConnection({ shopDomain, accessToken });
+  return new ShopifyStoreConnection(config);
 }

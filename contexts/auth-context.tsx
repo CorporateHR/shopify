@@ -33,11 +33,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const parsedUser = JSON.parse(savedUser);
           setUser(parsedUser);
           setIsAuthenticated(true);
-          
-          // Redirect to dashboard if on store connection page
-          if (window.location.pathname === '/app/store-connection') {
-            router.push('/app/store-dashboard');
-          }
         } catch (error) {
           console.error("Error parsing user data", error);
           // Clear invalid localStorage data
@@ -66,7 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setUser(null);
     setIsAuthenticated(false);
-    router.push('/app/store-connection');
   };
 
   // Prevent rendering until client-side load is complete

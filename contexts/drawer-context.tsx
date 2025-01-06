@@ -2,7 +2,6 @@
 
 import React, { createContext, useState, ReactNode, useCallback } from 'react';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
-import StoreDashboard from '@/app/store-dashboard/page';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface DrawerContentConfig {
@@ -43,8 +42,6 @@ export function DrawerProvider({ children }: { children: ReactNode }) {
     if (!drawerContent) return null;
 
     switch (drawerContent.content) {
-      case 'store-dashboard':
-        return <StoreDashboard {...(drawerContent.props || {})} />;
       default:
         return null;
     }

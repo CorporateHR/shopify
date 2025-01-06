@@ -28,6 +28,16 @@ export default async function handler(
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // Check for Shopify store credentials
+  const shopName = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_DOMAIN;
+  const accessToken = process.env.SHOPIFY_ACCESS_TOKEN;
+
+  if (!shopName || !accessToken) {
+    return res.status(401).json({ 
+      error: 'Shopify store credentials are not configured' 
+    });
+  }
+
   try {
     // Validate request body
     const { 
@@ -46,59 +56,36 @@ export default async function handler(
       });
     }
 
-    // Retrieve store credentials from environment
-    const shopName = process.env.SHOPIFY_STORE_DOMAIN;
-    const accessToken = process.env.SHOPIFY_ACCESS_TOKEN;
-
-    if (!shopName || !accessToken) {
-      return res.status(401).json({ 
-        error: 'Shopify store credentials are not configured' 
-      });
-    }
-
     // Initialize Shopify client
     const shopify = new Shopify({
-      shopName: shopName,
-      accessToken: accessToken
+      shopName,
+      accessToken
     });
 
-    // Prepare product data for Shopify
-    const productData = {
-      title: title,
+    // Create product
+    const product = await shopify.product.create({
+      title,
       body_html: description,
-      vendor: vendor || '',
-      product_type: '',
-      tags: [],
+      vendor: vendor || 'Default Vendor',
       variants: [{
-        price: price,
-        sku: sku,
-        inventory_quantity: parseInt(quantity, 10).toString(),
-        inventory_management: 'shopify'
+        price,
+        sku,
+        inventory_quantity: parseInt(quantity, 10)
       }]
-    };
+    });
 
-    // Create product in Shopify
-    const createdProduct = await shopify.product.create(productData);
+    // Return created product details
+    return res.status(201).json({
+      id: product.id.toString(),
+      title: product.title,
+      price: product.variants[0].price,
+      inventory: product.variants[0].inventory_quantity || 0
+    });
 
-    // Prepare response
-    const response: ProductCreationResponse = {
-      id: createdProduct.id.toString(),
-      title: createdProduct.title,
-      price: createdProduct.variants[0]?.price || price,
-      inventory: createdProduct.variants[0]?.inventory_quantity 
-        ? parseInt(createdProduct.variants[0].inventory_quantity, 10) 
-        : parseInt(quantity, 10)
-    };
-
-    res.status(201).json(response);
   } catch (error) {
-    console.error('Product Creation Error:', error);
-    
-    // Provide a meaningful error response
-    res.status(500).json({ 
-      error: error instanceof Error 
-        ? error.message 
-        : 'Failed to create product' 
+    console.error('Product creation error:', error);
+    return res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Unknown error occurred' 
     });
   }
 }

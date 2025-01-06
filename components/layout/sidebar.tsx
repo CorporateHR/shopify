@@ -23,11 +23,6 @@ const navItems = [
     icon: Upload
   },
   {
-    name: 'Store Connection',
-    href: '/store-connection',
-    icon: LinkIcon
-  },
-  {
     name: 'Settings',
     href: '/settings',
     icon: Settings
@@ -111,24 +106,26 @@ export default function Sidebar() {
       </div>
 
       <nav className="mt-6">
-        {navItems.map((item) => (
-          <Link 
-            key={item.href}
-            href={item.href}
-            className={`
-              block px-6 py-3 transition-colors 
-              ${pathname === item.href 
-                ? 'bg-[#00A6B2]/20 text-[#00A6B2] border-r-4 border-[#00A6B2]' 
-                : 'text-[#C0C0C0] hover:bg-[#2A2A2A]'
-              }
-            `}
-          >
-            <div className="flex items-center space-x-3">
-              <item.icon className="w-5 h-5" />
-              <span>{item.name}</span>
-            </div>
-          </Link>
-        ))}
+        {navItems
+          .filter(item => item.href) 
+          .map((item) => (
+            <Link 
+              key={item.href}
+              href={item.href}
+              className={`
+                block px-6 py-3 transition-colors 
+                ${pathname === item.href 
+                  ? 'bg-[#00A6B2]/20 text-[#00A6B2] border-r-4 border-[#00A6B2]' 
+                  : 'text-[#C0C0C0] hover:bg-[#2A2A2A]'
+                }
+              `}
+            >
+              <div className="flex items-center space-x-3">
+                <item.icon className="w-5 h-5" />
+                <span>{item.name}</span>
+              </div>
+            </Link>
+          ))}
       </nav>
 
       <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-[#2A2A2A]">
