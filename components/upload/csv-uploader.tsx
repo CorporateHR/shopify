@@ -29,7 +29,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { getShopifyTemplateHeaders } from '@/utils/shopify-template';
-import { googleSheetsService } from '@/utils/google-sheets';
 
 interface UploadedData {
   data: any[];
@@ -521,26 +520,11 @@ export function CSVUploader() {
 
       // Automatically start AI mapping
       await mapFieldsWithAI();
-
-      const transformedData = googleSheetsService.transformData(
-        parsedData.data,
-        fieldMappings.reduce((acc, map) => ({
-          ...acc,
-          [map.originalField]: map.suggestedField
-        }), {})
-      );
-      
-      await googleSheetsService.appendToSheet(transformedData);
-      toast({
-        title: "Success",
-        description: "Data successfully uploaded to Google Sheets",
-        variant: "default",
-      });
     } catch (error) {
-      console.error('Error uploading to Google Sheets:', error);
+      console.error('Error uploading:', error);
       toast({
         title: "Error",
-        description: "Failed to upload data to Google Sheets",
+        description: "Failed to upload data",
         variant: "destructive",
       });
     } finally {

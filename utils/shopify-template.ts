@@ -73,7 +73,60 @@ export const getShopifyTemplateHeaders = (): string[] => {
   return baseHeaders;
 };
 
-// Comprehensive mapping function
+// Field mapping dictionary
+const fieldMappings: Record<string, string> = {
+  'Product Name': 'Title',
+  'Description': 'Body (HTML)',
+  'Brand Name': 'Vendor',
+  'Category': 'Product Category',
+  'Item Group': 'Type',
+  'Keywords': 'Tags',
+  'Live Status': 'Published',
+  'Size Type': 'Option1 Name',
+  'Size Value': 'Option1 Value',
+  'Color Type': 'Option2 Name',
+  'Color Choice': 'Option2 Value',
+  'Item Code': 'Variant SKU',
+  'Weight in G': 'Variant Grams',
+  'Stock System': 'Variant Inventory Tracker',
+  'Stock Count': 'Variant Inventory Qty',
+  'Stock Rule': 'Variant Inventory Policy',
+  'Shipping Method': 'Variant Fulfillment Service',
+  'Current Price': 'Variant Price',
+  'Original Price': 'Variant Compare At Price',
+  'Needs Shipping': 'Variant Requires Shipping',
+  'Tax Rule': 'Variant Taxable',
+  'Barcode ID': 'Variant Barcode',
+  'Image Link': 'Image Src',
+  'Visual Order': 'Image Position',
+  'Picture Text': 'Image Alt Text',
+  'Digital Gift': 'Gift Card',
+  'Meta Title': 'SEO Title',
+  'Meta Details': 'SEO Description',
+  'Store Category': 'Google Shopping / Google Product Category',
+  'Target Gender': 'Google Shopping / Gender',
+  'Target Age': 'Google Shopping / Age Group',
+  'Item Number': 'Google Shopping / MPN',
+  'Marketing Group': 'Google Shopping / AdWords Grouping',
+  'Marketing Keywords': 'Google Shopping / AdWords Labels',
+  'Custom Item': 'Google Shopping / Custom Product',
+  'Store Label 0': 'Google Shopping / Custom Label 0',
+  'Store Label 1': 'Google Shopping / Custom Label 1',
+  'Store Label 2': 'Google Shopping / Custom Label 2',
+  'Store Label 3': 'Google Shopping / Custom Label 3',
+  'Store Label 4': 'Google Shopping / Custom Label 4',
+  'Product Image': 'Variant Image',
+  'Product Mass Unit': 'Variant Weight Unit',
+  'Unit Cost': 'Cost per item',
+  'Sales Amount': 'Price / International',
+  'Compare Rate': 'Compare At Price / International',
+  'Item State': 'Status',
+  'Extra Info': 'Additional Field 1',
+  'Style Type': 'Additional Field 2',
+  'URL Path': 'Handle'
+};
+
+// Mapping function that uses the field mappings
 export const mapToShopifyTemplate = (
   uploadedData: Record<string, any>[], 
   headerMappings: Record<string, string> = {}
@@ -83,51 +136,34 @@ export const mapToShopifyTemplate = (
   return uploadedData.map(row => {
     const mappedRow: ShopifyProduct = {};
     
-    // Create a reverse mapping from original headers to Shopify headers
-    const reverseHeaderMappings: Record<string, string> = {};
+    // First, apply any custom header mappings
     Object.entries(headerMappings).forEach(([originalHeader, shopifyHeader]) => {
-      reverseHeaderMappings[originalHeader] = shopifyHeader;
-    });
-
-    // Track which Shopify headers have been mapped
-    const mappedShopifyHeaders = new Set<string>();
-
-    // First, try exact and mapped matches
-    Object.keys(row).forEach(originalHeader => {
-      const shopifyHeader = reverseHeaderMappings[originalHeader];
-      
-      if (shopifyHeader) {
+      if (row[originalHeader] !== undefined) {
         mappedRow[shopifyHeader as keyof ShopifyProduct] = row[originalHeader];
-        mappedShopifyHeaders.add(shopifyHeader);
-      } else if (shopifyHeaders.includes(originalHeader)) {
-        mappedRow[originalHeader as keyof ShopifyProduct] = row[originalHeader];
-        mappedShopifyHeaders.add(originalHeader);
       }
     });
 
-    // Then, try case-insensitive and partial matches
-    Object.keys(row).forEach(originalHeader => {
-      if (!reverseHeaderMappings[originalHeader]) {
-        const matchedHeader = shopifyHeaders.find(shopifyHeader => 
-          shopifyHeader.toLowerCase() === originalHeader.toLowerCase() ||
-          shopifyHeader.toLowerCase().includes(originalHeader.toLowerCase()) ||
-          originalHeader.toLowerCase().includes(shopifyHeader.toLowerCase())
-        );
+    // Then, apply our predefined field mappings
+    Object.entries(fieldMappings).forEach(([originalHeader, shopifyHeader]) => {
+      if (row[originalHeader] !== undefined && !mappedRow[shopifyHeader as keyof ShopifyProduct]) {
+        mappedRow[shopifyHeader as keyof ShopifyProduct] = row[originalHeader];
+      }
+    });
 
-        if (matchedHeader && !mappedShopifyHeaders.has(matchedHeader)) {
-          mappedRow[matchedHeader as keyof ShopifyProduct] = row[originalHeader];
-          mappedShopifyHeaders.add(matchedHeader);
-        }
+    // For any unmapped fields, try direct mapping
+    Object.entries(row).forEach(([originalHeader, value]) => {
+      if (shopifyHeaders.includes(originalHeader) && !mappedRow[originalHeader as keyof ShopifyProduct]) {
+        mappedRow[originalHeader as keyof ShopifyProduct] = value;
       }
     });
-    
-    // Fill in unmapped Shopify headers with 'N/A'
-    shopifyHeaders.forEach(shopifyHeader => {
-      if (!mappedShopifyHeaders.has(shopifyHeader)) {
-        mappedRow[shopifyHeader as keyof ShopifyProduct] = 'N/A';
+
+    // Fill in any missing fields with empty strings
+    shopifyHeaders.forEach(header => {
+      if (mappedRow[header as keyof ShopifyProduct] === undefined) {
+        mappedRow[header as keyof ShopifyProduct] = '';
       }
     });
-    
+
     return mappedRow;
   });
 };
